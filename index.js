@@ -55,14 +55,20 @@ async function getMessage() {
         |                       contact: encse@csokavar.hu                               
         |                                                                                \n`.replace(/.*\|/g, "");
 
-    msg += 'Latest tweets:';
-    msg += await recent_tweets();
+    try {
+        const tweets = await recent_tweets();
+        msg += 'Latest tweets:\n';
+        msg += tweets;
+    } catch (err) {
+        console.error("Couldn't retrieve tweets.", err);
+    }
     return msg;
 }
 
 const tweetCache = {};
 
 async function recent_tweets() {
+
     if (tweetCache != null && tweetCache.time + (10 * 60 * 1000) >= Date.now()) {
         console.log("Returning tweets from cache");
         return tweetCache.text;
@@ -79,7 +85,7 @@ async function recent_tweets() {
             screen_name: config.twitter_user,
             lang: 'en'
         }
-        new Twitter(config).get('statuses/user_timeline', params, (err, data) => {
+        new Twitter(config.twitter_auth).get('statuses/user_timeline', params, (err, data) => {
             if (!err) {
                 let res = '';
                 for (let tweet of data) {
@@ -93,10 +99,7 @@ async function recent_tweets() {
                 console.log("Got tweets");
                 resolve(tweetCache.text);
             } else {
-                console.error("Couldn't retrieve tweets");
-                console.error('Params', params);
-                console.error(err);
-                reject(err);
+                reject({params: params, err: err});
             }
         });
     });

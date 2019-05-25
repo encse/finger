@@ -1,12 +1,12 @@
 {
   "name": "public",
   "version": "1.0.0",
-  "description": "let node.js run on ports under 1024: setcap 'cap_net_bind_service=+ep' /usr/bin/node",
+  "description": "A simple finger service that returns latest tweets for a user. Works on a TCP port (e.g. the classic port 79) and also on a websocket.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "ence",
   "license": "ISC",
   "dependencies": {
     "console-stamp": "^0.2.7",
