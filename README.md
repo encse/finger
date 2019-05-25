@@ -8,6 +8,49 @@ I set it up so that it works on the traditional finger port (79). It's not compl
 
 We live in the 21th century, and everything is on the the web nowadays, so I added a second access point and exposed everything on websocket as well. Now if you open  the developer window on my website you see the same message dumped into the console.
 
+```
+                                      99X                                      
+                                 riG   @@@   Gi;                                
+                                 B@@G  @@@  @@@9                                
+                                  @@@; @@@ i@@G                                 
+                                   @@@:B@G,@@@                                  
+                                   :@@@BBB@@@                                   
+                                    ,@BBBB@@                                    
+                     5M525252525253ir@BBBBBBri3225252525259i                    
+                     @@@@@@@@@@@@@@@@BBBBBBB@@@@@@@@@@@@@@@@                    
+                    :@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@@                    
+                    r@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@:                   
+                    9@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@r                   
+                    @@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@G                   
+                    @@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@@                   
+                   :@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@@                   
+                   i@BBBBBBB@@@@@BBBBBBBBBBBBBB@@@@@BBBBBBBB@,                  
+                   9@BBBBBB@BrrrG@@BBBBBBBBBBB@BirrM@@BBBBBB@i                  
+                   @@BBBBB@r     ;@BBBBBBBBBB@5      @BBBBBB@G                  
+                   @@BBBBB@;     :@BBBBBBBBBB@3      @@BBBBB@@                  
+                  :@BBBBBBB@X;:;2@BBBB@@@@BBBB@Gr:,i@@BBBBBB@@                  
+ :                i@BBBBBBBB@@@@@@B@@@@M3@@@@B@@@@@@@BBBBBBBB@;                 
+ 3@@@@@@@@@@@@@@@@@BBBBBBBBBBBBBB@@@Br    ,G@@@@BBBBBBBBBBBBB@@@@@@@@@@@@@@@@@@r
+  :@@@@@@@@@@@@@@@@BBBBBBBBBBBBB@Gr          ;XBBBBBBBBBBBBBBB@@@@@@@G@@@@@@@B: 
+    r@@@BBB; :,;:3@BBBBBBBBBBBBB@r   5B@GBBi   BBBBBBBBBBBBBBB@:     r@BB@@@r   
+      B@@B@B     i@BBBBBBBBBBBBBB@@G, :9@M;,3@@BBBBBBBBBBBBBBB@r    B@@B@@9     
+       r@@@@@G   B@BBBBBBBBBBBBBBB@@@@r  ;9@@@BBBBBBBBBBBBBBBB@9  5@@@@@@,      
+         9@@@@@; @@BBBBBBBBBBBBBBBBBB@@@@@@BBBBBBBBBBBBBBBBBBB@B:@@@@@@2        
+          ,@@@@@B@BBBBBBBBBBBBBBBBBBBBB@BBBBBBBBBBBBBBBBBBBBBBB@@@B@@@          
+            5@@@@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@@@i           
+             :@@@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@@B             
+               r@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@@r              
+                G@BBBBBBBBB@@@@BBBBBBBBBBBBBBBBBB@@@@@BBBBBBBBB@i               
+                @@BBB@@@@@@GBGB@@@@@BBBBBBBB@@@@@BBBBB@@@@@BBBB@B               
+               :@@BBBGr:;@B   ;@9 ;i@BBBBBB@9r r@G   i@5 ;3@BBB@@               
+               r@BBB@B   9@   3@   r@BBBBBB@G   @@   9@   i@BBBB@               
+               M@BBBB@G   B   5r  ,@BBBBBBBB@9   B   G:  r@@BBBB@r              
+               B@BBBBB@i          @@BBBBBBBB@@r         :@@BBBBB@X              
+               @@BBBBB@@,        @@BBBBBBBBBB@@:        @@BBBBBB@@              
+              :@@BBBBBB@@       9@BBBBBBBBBBBB@@       G@BBBBBBB@@              
+              r@BBGBGBGB@@@@@@@@@BGBGBGBGGGBGBB@@@@@@@@@BBGGGBGBB@     
+```
+
 ## Setting it up
 Run `npm install` to download dependencies.
 
@@ -39,7 +82,7 @@ finger @localhost
 
 You can also try it in the browser bby opening the attached `index.html` file.
 
-### Setting up as service (on Ubuntu at least)
+### Create a service (on Ubuntu at least)
 
 Copy the `finger.service` file to `/etc/systemd/system`, adjust paths to `app.js` and working directory properly.
 
@@ -72,9 +115,9 @@ If something goes wrong, check the logs with
 journalctl -u myapp
 ```
 
-### Set up Nginx as a wss proxy
+### Nginx as a wss proxy
 
-If you want to access the websocket through ssl, you need set up a proxy that terminates the SSL connection and forwards the requests to the finger service.
+If you want to access the websocket through SSL, you need set up a proxy that terminates the SSL connection and forwards the requests to the finger service on localhost.
 
 Supposed that the `websocket_port` is set to the 7979 in your `config.js` adjust your nginx config file like this: 
 
