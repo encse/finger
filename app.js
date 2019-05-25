@@ -1,11 +1,9 @@
-#! /usr/local/bin/node
 "use strict";
 const net = require('net');
 const WebSocketServer = require('websocket').server;
 const http = require('http');
 const Twitter = require('twitter');
 const config = require('./config.js');
-require('console-stamp')(console);
 
 async function getMessage() {
     let msg =

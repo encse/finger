@@ -2,14 +2,13 @@
   "name": "public",
   "version": "1.0.0",
   "description": "A simple finger service that returns latest tweets for a user. Works on a TCP port (e.g. the classic port 79) and also on a websocket.",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "ence",
   "license": "ISC",
   "dependencies": {
-    "console-stamp": "^0.2.7",
     "twitter": "^1.7.1",
     "websocket": "^1.0.28"
   }
