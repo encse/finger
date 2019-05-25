@@ -1,12 +1,12 @@
 
 # A tribute to the finger protocol
-I wanted to something historycal, and set up a simple `finger` service on my server. As finger is totally outdated today due to security and privacy concerns, I decided to implement something very simple that can still the reminiscence of the internet of the 1980's.
+I wanted to do omething historical, and set up a simple `finger` service on my [server](https://csokavar.hu). As finger is totally outdated today due to security and privacy concerns, I decided to implement something very simple that is still the reminiscence of the internet of the 1980's.
 
-Finger used to have a feature to show the contents of the user's `.plan` and `.project` folders. Today's equivalent of this could be to show the recent activity on social sites. I decided to go with twitter.
+Finger used to have a feature to show the contents of the user's `.plan` and `.project` files. Today's equivalent of this would be to show the recent activity on social sites. I decided to go with twitter.
 
-I set it up so that it works on the traditional finger port (79). It's not compliant to RFC 1288, as it is just my server, with a single user. It's more like an auto response when somebody connects to it.
+It works on the traditional finger port (79), but it's not compliant to RFC 1288, as it is just my server, with a single user. It's more like an auto response when somebody connects to it to TCP port.
 
-We live in the 21th century, and everything is on the the web nowadays, so I added a second access point and exposed everything on websocket as well. Now if you open  the developer window on my website you see the same message dumped into the console.
+We live in the 21th century, and everything is on the the web nowadays, so I added a second access point and exposed it on websocket as well. Now if you open the developer window on my website you see the same message dumped into the console.
 
 ```
                                       99X                                      
