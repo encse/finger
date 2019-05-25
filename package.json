@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "console-stamp": "^0.2.7",
     "twitter": "^1.7.1",
     "websocket": "^1.0.28"
   }

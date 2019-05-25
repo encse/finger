@@ -5,10 +5,11 @@ const WebSocketServer = require('websocket').server;
 const http = require('http');
 const Twitter = require('twitter');
 const config = require('./config.js');
+require('console-stamp')(console);
 
 async function getMessage() {
     let msg =
-       `|                                       99X                                      
+        `|                                       99X                                      
         |                                 riG   @@@   Gi;                                
         |                                 B@@G  @@@  @@@9                                
         |                                  @@@; @@@ i@@G                                 
@@ -62,7 +63,7 @@ async function getMessage() {
 const tweetCache = {};
 
 async function recent_tweets() {
-    if (tweetCache != null && tweetCache.time  + (10 * 60 * 1000) >= Date.now()){
+    if (tweetCache != null && tweetCache.time + (10 * 60 * 1000) >= Date.now()) {
         console.log("Returning tweets from cache");
         return tweetCache.text;
     }
@@ -70,7 +71,7 @@ async function recent_tweets() {
     console.log("Retreiving tweets...");
 
     return new Promise((resolve, reject) => {
-        
+
         var params = {
             q: '#nodejs',
             count: 10,
@@ -81,7 +82,7 @@ async function recent_tweets() {
         new Twitter(config).get('statuses/user_timeline', params, (err, data) => {
             if (!err) {
                 let res = '';
-                for(let tweet of data){
+                for (let tweet of data) {
                     res += `${tweet.created_at}\n`;
                     res += `${tweet.text}\n`;
                     res += `\n`;
@@ -89,7 +90,7 @@ async function recent_tweets() {
 
                 tweetCache.time = Date.now();
                 tweetCache.text = res
-                console.error("Got tweets");
+                console.log("Got tweets");
                 resolve(tweetCache.text);
             } else {
                 console.error("Couldn't retrieve tweets");
@@ -101,24 +102,38 @@ async function recent_tweets() {
     });
 }
 
-const fingerServer = net.createServer(async (socket) => {
-    socket.write(await getMessage());
-    socket.end();
-});
-fingerServer.listen(config.finger_port);
+if (config.finger_port) {
+    const server = net.createServer(async (socket) => {
+        socket.write(await getMessage());
+        socket.end();
+    }).on('error', (err) => {
+        console.error('finger server error', err);
+    });
 
-var httpServer = http.createServer(() => {
-    response.end();
-});
-httpServer.listen(config.websocket_port, () => {});
+    server.listen(config.finger_port, () => {
+        console.log('opened finger server on', server.address());
+    });
+}
 
-const wsServer = new WebSocketServer({ httpServer: httpServer });
+if (config.websocket_port) {
+    const httpServer = http.createServer(() => {
+        response.end();
+    }).on('error', (err) => {
+        console.error('http server error', err);
+    });
 
-wsServer.on('request', async (request) => {
-    var connection = request.accept('finger-protocol', request.origin);
-    connection.sendUTF(await getMessage());
-    connection.close();
-    connection.on('error', (err) => {
-        console.error("websocket connection error", err);
-    })
-});
+    httpServer.listen(config.websocket_port, () => { 
+        console.log('opened http server on', httpServer.address());
+    });
+
+    const wsServer = new WebSocketServer({ httpServer: httpServer });
+
+    wsServer.on('request', async (request) => {
+        var connection = request.accept('finger-protocol', request.origin);
+        connection.sendUTF(await getMessage());
+        connection.close();
+        connection.on('error', (err) => {
+            console.error("websocket connection error", err);
+        })
+    });
+}
