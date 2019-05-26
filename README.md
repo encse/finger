@@ -95,13 +95,13 @@ setcap 'cap_net_bind_service=+ep' /usr/local/bin/node
 
 Start the service with
 ```
-systemctl start myapp
+systemctl start finger
 ```
 
 
 Enable it to run on boot with 
 ```
-systemctl enable myapp
+systemctl enable finger
 ```
 
 Now you can try it locally with
@@ -112,7 +112,7 @@ finger @localhost
 If something goes wrong, check the logs with
 
 ```
-journalctl -u myapp
+journalctl -u finger
 ```
 
 ### Nginx as a wss proxy
