@@ -88,7 +88,7 @@ async function recent_tweets() {
                 let res = '';
                 for (let tweet of data) {
                     res += `${tweet.created_at}\n`;
-                    res += `${tweet.text}\n`;
+                    res += `|\t${tweet.text.split("\n").join("\n|\t")}\n`;
                     res += `\n`;
                 }
 
