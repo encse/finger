@@ -1,6 +1,7 @@
 <!DOCTYPE html> 
 <html>
 <body>
+    <pre></pre>
     <script>
         const useSSL = false;
         const host = "localhost:7979";
@@ -8,7 +9,7 @@
         var connection = new WebSocket(`${protocol}:${host}`, "finger-protocol");
 
         connection.onmessage = function (e) {
-            console.log(e.data);
+            document.getElementsByTagName('pre')[0].innerText = e.data;
         };
 
         </script>

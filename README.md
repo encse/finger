@@ -1,12 +1,18 @@
 
 # A tribute to the finger protocol
-I wanted to do something historical, and set up a simple `finger` service on my [server](https://csokavar.hu). As finger is totally outdated today due to security and privacy concerns, I decided to implement something very simple that is still the reminiscence of the internet of the 1980's.
+I wanted to do something historical, and set up a simple `finger` service on my [server](https://csokavar.hu). 
+As finger is totally outdated today due to security and privacy concerns, I decided to implement something very 
+simple that is still the reminiscence of the internet of the 1980's.
 
-Finger used to have a feature to show the contents of the user's `.plan` and `.project` files. Today's equivalent of this would be to show the recent activity on social media sites. I decided to go with twitter.
+Finger used to have a feature to show the contents of the user's `.plan` and `.project` files. Today's equivalent 
+of this would be to show the recent activity on social media sites. I decided to go with twitter.
 
-It works on the traditional finger port (79), but it's not compliant to RFC 1288, as it is just my server, with a single user. It's more like an auto response when somebody connects to it to TCP port.
+It works on the traditional finger port (79), but it's not compliant to RFC 1288, as it is just my server, with 
+a single user. It's more like an auto response when somebody connects to it to TCP port.
 
-We live in the 21st century, and everything is on the the web nowadays, so I added a second access point and exposed it on websocket as well. Now if you open the developer window on my website you see the same message dumped into the console.
+We live in the 21st century, and everything is on the the web nowadays, so I added a second access point and 
+exposed it on websocket as well. Now if you open the developer window on my website you see the same message 
+dumped into the console.
 
 ```
                                       99X                                      
@@ -52,74 +58,28 @@ We live in the 21st century, and everything is on the the web nowadays, so I add
 ```
 
 ## Setting it up
-Run `npm install` to download dependencies.
-
-Create a file `config.js` with the following content:
-
-```
-module.exports = {
-    twitter_auth: {
-        consumer_key: '...',
-        consumer_secret: '...',
-        access_token_key: '...',
-        access_token_secret: '...',
-    },
-    twitter_user: 'encse',
-    finger_port: 79,
-    websocket_port: 7979
-}
-```
-
-You get the `twitter_auth` tokens by registering a developer account and creating an app at https://developer.twitter.com/. 
-
+I tried to make it simple and wrapped it in a Dockerfile. All you have to do is editing the `config.js`.
+You get the `twitter_auth` tokens by registering a developer account and creating an app 
+at https://developer.twitter.com/. 
 
 Now test it with
-
 ```
-node app.js
-finger @localhost
+make run
 ```
 
-You can also try it in the browser bby opening the attached `index.html` file.
-
-### Create a service (on Ubuntu at least)
-
-Copy the `finger.service` file to `/etc/systemd/system`, adjust paths to `app.js` and working directory properly.
-
-Add privileges to `/usr/local/bin/node` so that it can access ports under 1024 (in our case 79, which is the finger port).
-
-```
-setcap 'cap_net_bind_service=+ep' /usr/local/bin/node
-```
-
-
-Start the service with
-```
-systemctl start finger
-```
-
-
-Enable it to run on boot with 
-```
-systemctl enable finger
-```
-
-Now you can try it locally with
-
+And in a separate window:
 ```
 finger @localhost
 ```
-If something goes wrong, check the logs with
-
-```
-journalctl -u finger
-```
+You can also try it in the browser by opening the attached `index.html` file.
 
 ### Nginx as a wss proxy
 
-If you want to access the websocket through SSL, you need set up a proxy that terminates the SSL connection and forwards the requests to the finger service on localhost.
+If you want to access the websocket through SSL, you need set up a proxy that terminates the 
+SSL connection and forwards the requests to the finger service on localhost.
 
-Supposed that the `websocket_port` is set to the 7979 in your `config.js` adjust your nginx config file like this: 
+Supposed that the `websocket_port` is set to the 7979 in your `config.js` adjust your nginx 
+config file like this: 
 
 ```
 server {
