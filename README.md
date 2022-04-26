@@ -64,7 +64,7 @@ at https://developer.twitter.com/.
 
 Now test it with
 ```
-make run
+./service run
 ```
 
 And in a separate window:
