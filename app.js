@@ -81,14 +81,16 @@ async function recent_tweets() {
             count: 10,
             result_type: 'recent',
             screen_name: config.twitter_user,
+            tweet_mode: 'extended',
             lang: 'en'
         }
         new Twitter(config.twitter_auth).get('statuses/user_timeline', params, (err, data) => {
             if (!err) {
+                console.log(data);
                 let res = '';
                 for (let tweet of data) {
                     res += `${tweet.created_at}\n`;
-                    res += `|\t${tweet.text.split("\n").join("\n|\t")}\n`;
+                    res += `>  ${tweet.full_text.split("\n").join("\n|\t")}\n`;
                     res += `\n`;
                 }
 
@@ -97,6 +99,7 @@ async function recent_tweets() {
                 console.log("Got tweets");
                 resolve(tweetCache.text);
             } else {
+                console.log(err);
                 reject({params: params, err: err});
             }
         });
