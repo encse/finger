@@ -86,7 +86,7 @@ async function recent_tweets() {
         }
         new Twitter(config.twitter_auth).get('statuses/user_timeline', params, (err, data) => {
             if (!err) {
-                console.log(data);
+                // console.log(data);
                 let res = '';
                 for (let tweet of data) {
                     res += `${tweet.created_at}\n`;
