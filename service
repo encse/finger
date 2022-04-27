@@ -22,7 +22,7 @@ function cmd() {
   if [ "$1" == "start" ]
   then
     docker build -t finger-service -f Dockerfile .
-    docker run --rm -d -p79:79 -p7979:7979 --name finger-service finger-service 
+    docker run --restart always -d -p79:79 -p7979:7979 --name finger-service finger-service
     echo -e 'Your containers are starting in the background. Use \033[31mservice log\033[0m to look at the logs.'
   elif [ "$1" == "kick" ]
   then
