@@ -108,7 +108,10 @@ async function recent_tweets() {
 
 if (config.finger_port) {
     const server = net.createServer(async (socket) => {
-        socket.write(await getMessage());
+        let message = await getMessage()
+        // remove accents such as á -> a, é -> e, because raw TCP doesn't like it...
+        message = message.normalize("NFD").replace(/\p{Diacritic}/gu, "")
+        socket.write(message);
         socket.end();
     }).on('error', (err) => {
         console.error('finger server error', err);
