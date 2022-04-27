@@ -13,33 +13,34 @@ tput sgr0
 
 USAGE='Local environment management commands:
   service \033[31mstart\033[0m - start the environment
-  service \033[31mkick\033[0m - restarts the environment
   service \033[31mstop\033[0m - stop the environment
+  service \033[31mkick\033[0m - restarts the environment
   service \033[31mlogs\033[0m - watch the Docker logs
 '
 
-function cmd() {
-  if [ "$1" == "start" ]
-  then
+function start() {
     docker build -t finger-service -f Dockerfile .
     docker run --restart always -d -p79:79 -p7979:7979 --name finger-service finger-service
     echo -e 'Your containers are starting in the background. Use \033[31mservice log\033[0m to look at the logs.'
-  elif [ "$1" == "kick" ]
-  then
-    echo -e "restarting"
-    docker restart finger-service
-  elif [ "$1" == "stop" ]
-  then
+}
+
+function stop() {
     echo -e "stopping"
-    docker stop finger-service
-  elif [ "$1" == "log" ]
-  then
+    docker rm -f finger-service
+}
+
+function kick() {
+    stop && start 
+}
+
+function logs() {
     docker logs --follow finger-service
-  else
+}
+
+function usage() {
     echo -e "$USAGE"
     tput sgr0
     exit 1
-  fi
 }
 
-cmd $1 $@
+if typeset -F | grep -w -q $1; then $1; else usage; fi
