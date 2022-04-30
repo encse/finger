@@ -68,7 +68,8 @@ async function getMessage() {
     } catch (err) {
         console.error("Couldn't retrieve tweets.", err);
     }
-    return msg;
+    
+    return lineBreak(msg, 80).join("\n");
 }
 
 const tweetCache = {};
@@ -172,7 +173,6 @@ if (config.finger_port) {
         let message = await getMessage()
         // remove accents such as á -> a, é -> e, because raw TCP doesn't like it...
         message = message.normalize("NFD").replace(/\p{Diacritic}/gu, "")
-        message = lineBreak(message, 80).join("\n");
         socket.write(message);
         socket.end();
     }).on('error', (err) => {
