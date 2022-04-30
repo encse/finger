@@ -4,10 +4,16 @@ const WebSocketServer = require('websocket').server;
 const http = require('http');
 const Twitter = require('twitter');
 const config = require('./config.js');
+const os = require('os');
+
+
 
 async function getMessage() {
+
+    os.uptime()
+
     let msg =
-        `|                                       99X                                      
+       `|                                       99X                                      
         |                                 riG   @@@   Gi;                                
         |                                 B@@G  @@@  @@@9                                
         |                                  @@@; @@@ i@@G                                 
@@ -46,16 +52,18 @@ async function getMessage() {
         |               B@BBBBB@i          @@BBBBBBBB@@r         :@@BBBBB@X              
         |               @@BBBBB@@,        @@BBBBBBBBBB@@:        @@BBBBBB@@              
         |              :@@BBBBBB@@       9@BBBBBBBBBBBB@@       G@BBBBBBB@@              
-        |              r@BBGBGBGB@@@@@@@@@BGBGBGBGGGBGBB@@@@@@@@@BBGGGBGBB@              
-        |                                                                                
-        |           This is csokavar.hu Encsé's home on the web. Happy surfing.          
-        |                                                                                
-        |                       contact: encse@csokavar.hu                               
-        |                                                                                \n`.replace(/.*\|/g, "");
+        |              r@BBGBGBGB@@@@@@@@@BGBGBGBGGGBGBB@@@@@@@@@BBGGGBGBB@              \n`.replace(/.*\| /g, "");
+    msg += "\n";
+    msg += center("This is csokavar.hu Encsé's home on the web. Happy surfing.", 80) + "\n";
+    msg += center("Server uptime: " + uptime(), 80) + "\n";
+    msg += center("contact: encse@csokavar.hu", 80)+ "\n";
+    msg += "\n";
 
     try {
         const tweets = await recent_tweets();
-        msg += 'Latest tweets:\n';
+        msg += 'Latest tweets\n';
+        msg += '-------------\n';
+        msg += '\n';
         msg += tweets;
     } catch (err) {
         console.error("Couldn't retrieve tweets.", err);
@@ -89,8 +97,8 @@ async function recent_tweets() {
                 // console.log(data);
                 let res = '';
                 for (let tweet of data) {
-                    res += `${tweet.created_at}\n`;
-                    res += `>  ${tweet.full_text.split("\n").join("\n|\t")}\n`;
+                    res += `[${tweet.created_at}]\n`;
+                    res += `${tweet.full_text.split("\n").join("\n|\t")}\n`;
                     res += `\n`;
                 }
 
@@ -106,11 +114,65 @@ async function recent_tweets() {
     });
 }
 
+
+function lineBreak(lines, width) {
+    lines = lines.split("\n")
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        let ichSpace = 0;
+        let escape = false;
+        let nonEscapedChars = 0;
+        for (let ich = 0; ich < line.length; ich++) {
+            if (escape) {
+                if (line[ich] == ';') {
+                    escape = false;
+                }
+            } else {
+                nonEscapedChars++;
+                if (line[ich] == ' ') {
+                    ichSpace = ich;
+                }
+                if (nonEscapedChars > width) {
+                    if (ichSpace > 0) {
+                        lines.splice(i + 1, 0, line.substring(ichSpace + 1));
+                        lines[i] = line.substring(0, ichSpace).trimRight();
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    return lines;
+}
+
+function center(st, width){
+    return st.padStart((width + st.length) / 2, ' ');
+}
+
+function uptime(){
+    var ut_sec = os.uptime();
+    var ut_min = ut_sec/60;
+    var ut_hour = ut_min/60;
+    
+    ut_sec = Math.floor(ut_sec);
+    ut_min = Math.floor(ut_min);
+    ut_hour = Math.floor(ut_hour);
+    
+    ut_hour = ut_hour%60;
+    ut_min = ut_min%60;
+    ut_sec = ut_sec%60;
+    
+    return (ut_hour + " Hour(s) " 
+            + ut_min + " minute(s) and " 
+            + ut_sec + " second(s)");
+}
+
 if (config.finger_port) {
     const server = net.createServer(async (socket) => {
         let message = await getMessage()
         // remove accents such as á -> a, é -> e, because raw TCP doesn't like it...
         message = message.normalize("NFD").replace(/\p{Diacritic}/gu, "")
+        message = lineBreak(message, 80).join("\n");
         socket.write(message);
         socket.end();
     }).on('error', (err) => {
