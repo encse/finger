@@ -11,6 +11,7 @@
   "dependencies": {
     "@types/twitter": "^1.7.1",
     "@types/websocket": "^1.0.5",
+    "ts-node": "^10.7.0",
     "twitter": "^1.7.1",
     "websocket": "^1.0.28"
   }
