@@ -78,7 +78,7 @@ You can also try it in the browser by opening the attached `index.html` file.
 If you want to access the websocket through SSL, you need set up a proxy that terminates the 
 SSL connection and forwards the requests to the finger service on localhost.
 
-Supposed that the `websocket_port` is set to the 7979 in your `config.js` adjust your nginx 
+Supposed that the `websocket_port` is set to the 7979 in your `config.json` adjust your nginx 
 config file like this: 
 
 ```
