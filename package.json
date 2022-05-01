@@ -4,11 +4,13 @@
   "description": "A simple finger service that returns latest tweets for a user. Works on a TCP port (e.g. the classic port 79) and also on a websocket.",
   "main": "app.js",
   "scripts": {
-    "service": "node app.js"
+    "service": "npx ts-node app.ts"
   },
   "author": "encse",
   "license": "ISC",
   "dependencies": {
+    "@types/twitter": "^1.7.1",
+    "@types/websocket": "^1.0.5",
     "twitter": "^1.7.1",
     "websocket": "^1.0.28"
   }

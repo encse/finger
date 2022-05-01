@@ -1,12 +1,10 @@
 "use strict";
-const net = require('net');
-const WebSocketServer = require('websocket').server;
-const http = require('http');
-const Twitter = require('twitter');
-const config = require('./config.js');
-const os = require('os');
-
-
+import net from 'net'
+import {server as WebSocketServer} from 'websocket';
+import http from 'http';
+import Twitter from 'twitter';
+import config from './config.json';
+import os from 'os';
 
 async function getMessage() {
 
@@ -68,11 +66,11 @@ async function getMessage() {
     } catch (err) {
         console.error("Couldn't retrieve tweets.", err);
     }
-    
-    return lineBreak(msg, 80).join("\n");
-}
 
-const tweetCache = {};
+    return lineBreak(msg, 80);
+}
+type TweetCache = {time:number, text: string}
+let tweetCache: TweetCache | null = null;
 
 async function recent_tweets() {
 
@@ -93,18 +91,20 @@ async function recent_tweets() {
             tweet_mode: 'extended',
             lang: 'en'
         }
-        new Twitter(config.twitter_auth).get('statuses/user_timeline', params, (err, data) => {
+        new Twitter(config.twitter_auth).get('statuses/user_timeline', params, (err, data: any) => {
             if (!err) {
-                // console.log(data);
+                console.log(data);
                 let res = '';
-                for (let tweet of data) {
-                    res += `[${tweet.created_at}]\n`;
+                for (let tweet of data as any) {
+                    res += `[${new Date(tweet.created_at).toUTCString()}]\n`;
                     res += `${tweet.full_text.split("\n").join("\n|\t")}\n`;
                     res += `\n`;
                 }
 
-                tweetCache.time = Date.now();
-                tweetCache.text = res
+                tweetCache = {
+                    time: Date.now(),
+                    text: res
+                };
                 console.log("Got tweets");
                 resolve(tweetCache.text);
             } else {
@@ -116,8 +116,8 @@ async function recent_tweets() {
 }
 
 
-function lineBreak(lines, width) {
-    lines = lines.split("\n")
+function lineBreak(text: string, width: number) {
+    let lines = text.split("\n")
     for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
         let ichSpace = 0;
@@ -143,10 +143,10 @@ function lineBreak(lines, width) {
             }
         }
     }
-    return lines;
+    return lines.join('\n');
 }
 
-function center(st, width){
+function center(st: string, width: number){
     return st.padStart((width + st.length) / 2, ' ');
 }
 
@@ -185,9 +185,7 @@ if (config.finger_port) {
 }
 
 if (config.websocket_port) {
-    const httpServer = http.createServer(() => {
-        response.end();
-    }).on('error', (err) => {
+    const httpServer = http.createServer().on('error', (err) => {
         console.error('http server error', err);
     });
 
