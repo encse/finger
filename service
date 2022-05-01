@@ -11,11 +11,13 @@ echo -e '\033[36m
                  \____\______/\033[0m'
 tput sgr0
 
-USAGE='Local environment management commands:
+USAGE='
   service \033[31mstart\033[0m - start the environment
   service \033[31mstop\033[0m - stop the environment
   service \033[31mkick\033[0m - restarts the environment
   service \033[31mlogs\033[0m - watch the Docker logs
+
+  service \033[31mdev\033[0m - run locally without docker
 '
 
 function start() {
@@ -37,10 +39,14 @@ function logs() {
     docker logs --follow finger-service
 }
 
+function dev() {
+   npm run service
+}
+
 function usage() {
     echo -e "$USAGE"
     tput sgr0
     exit 1
 }
 
-if typeset -F | grep -w -q $1; then $1; else usage; fi
+if ! type "$1" >/dev/null 2>&1; then usage; else $1; fi
