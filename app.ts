@@ -168,11 +168,20 @@ function uptime(){
             + ut_sec + " second(s)");
 }
 
+
+function asciiFold(st: string){
+    // remove accents such as á -> a, é -> e, because raw TCP doesn't like it...
+    st =  st.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+    // remove non ascii characters
+    return st.split('').map(
+        character => character.charCodeAt(0) < 127 ? character : ' '
+    ).join('');
+}
+
 if (config.finger_port) {
     const server = net.createServer(async (socket) => {
         let message = await getMessage()
-        // remove accents such as á -> a, é -> e, because raw TCP doesn't like it...
-        message = message.normalize("NFD").replace(/\p{Diacritic}/gu, "")
+        message = asciiFold(message);
         socket.write(message);
         socket.end();
     }).on('error', (err) => {
