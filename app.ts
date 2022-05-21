@@ -61,13 +61,12 @@ async function getMessage() {
         const tweets = await recent_tweets();
         msg += 'Latest tweets\n';
         msg += '-------------\n';
-        msg += '\n';
         msg += tweets;
     } catch (err) {
         console.error("Couldn't retrieve tweets.", err);
     }
 
-    return lineBreak(msg, 80);
+    return lineBreak(msg, 80, '| ');
 }
 type TweetCache = {time:number, text: string}
 let tweetCache: TweetCache | null = null;
@@ -85,7 +84,7 @@ async function recent_tweets() {
 
         var params = {
             q: '#nodejs',
-            count: 10,
+            count: 20,
             result_type: 'recent',
             screen_name: config.twitter_user,
             tweet_mode: 'extended',
@@ -94,11 +93,31 @@ async function recent_tweets() {
         new Twitter(config.twitter_auth).get('statuses/user_timeline', params, (err, data: any) => {
             if (!err) {
                 console.log(data);
+
+                const ids = new Set<string>();
+                for (let tweet of data as any) {
+                    ids.add(tweet.id_str);
+                }
+
+                const createThread = (tweet: any, tab = '') => {
+                    let res = '';
+                    res += `${tab}\n`;
+                    res += `${tab}[${new Date(tweet.created_at).toUTCString()}]\n`;
+                    res += `${tab}${tweet.full_text.split("\n").join("\n|\t")}\n`;
+
+                    for (let tweetNext of data as any) {
+                        if (tweetNext.in_reply_to_status_id_str == tweet.id_str) {
+                            res += createThread(tweetNext, '| ');
+                        }
+                    }
+                    return res;
+                }
+
                 let res = '';
                 for (let tweet of data as any) {
-                    res += `[${new Date(tweet.created_at).toUTCString()}]\n`;
-                    res += `${tweet.full_text.split("\n").join("\n|\t")}\n`;
-                    res += `\n`;
+                    if (tweet.in_reply_to_status_id_str == null) {
+                        res += createThread(tweet);
+                    }
                 }
 
                 tweetCache = {
@@ -116,13 +135,15 @@ async function recent_tweets() {
 }
 
 
-function lineBreak(text: string, width: number) {
+function lineBreak(text: string, width: number, cont: string = '') {
     let lines = text.split("\n")
+
     for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
         let ichSpace = 0;
         let escape = false;
         let nonEscapedChars = 0;
+        
         for (let ich = 0; ich < line.length; ich++) {
             if (escape) {
                 if (line[ich] == ';') {
@@ -135,8 +156,9 @@ function lineBreak(text: string, width: number) {
                 }
                 if (nonEscapedChars > width) {
                     if (ichSpace > 0) {
-                        lines.splice(i + 1, 0, line.substring(ichSpace + 1));
-                        lines[i] = line.substring(0, ichSpace).trimRight();
+                        let linePrefix = line.startsWith(cont) ? cont : '';
+                        lines.splice(i + 1, 0, linePrefix + line.substring(ichSpace + 1));
+                        lines[i] = line.substring(0, ichSpace).trimEnd();
                     }
                     break;
                 }
