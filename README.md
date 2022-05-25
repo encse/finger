@@ -8,7 +8,7 @@ Finger used to have a feature to show the contents of the user's `.plan` and `.p
 of this would be to show the recent activity on social media sites. I decided to go with twitter.
 
 It works on the traditional finger port (79), but it's not compliant to RFC 1288, as it is just my server, with 
-a single user. It's more like an auto response when somebody connects to it to TCP port.
+a single user. It's more like an auto response when somebody connects.
 
 We live in the 21st century, and everything is on the the web nowadays, so I added a second access point and 
 exposed it on websocket as well. Now if you open the developer window on my website you see the same message 
