@@ -58,7 +58,7 @@ dumped into the console.
 ```
 
 ## Setting it up
-I tried to make it simple and wrapped it in a Dockerfile. All you have to do is editing the `config.json`.
+I tried to make it simple and wrapped it in a Dockerfile. All you have to do is to edit the `config.json`.
 You get the `twitter_auth` tokens by registering a developer account and creating an app 
 at https://developer.twitter.com/. 
 
@@ -75,8 +75,8 @@ You can also try it in the browser by opening the attached `index.html` file.
 
 ### Nginx as a wss proxy
 
-If you want to access the websocket through SSL, you need set up a proxy that terminates the 
-SSL connection and forwards the requests to the finger service on localhost.
+If you want to access the websocket through SSL, you need to set up a proxy that terminates the 
+SSL connection and forwards the requests to the finger service in your container.
 
 Supposed that the `websocket_port` is set to the 7979 in your `config.json` adjust your nginx 
 config file like this: 
