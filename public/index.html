@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        * {
+            font-family: 'VT323', monospace;
+        }
+
+        html {
+            color: #aeaeae;
+            background: black;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <pre></pre>
+    <script>
+        const sleep = () => new Promise(resolve => window.requestAnimationFrame(resolve));
+
+        const host = new URL("/", document.location);
+        host.protocol = host.protocol.replace('http', 'ws');
+        let connection = new WebSocket(`${host}`, "finger-protocol");
+        const pre = document.getElementsByTagName('pre')[0];
+        connection.onmessage = async (e) => {
+            for (let i = 0; i < e.data.length; i++) {
+                pre.innerText += e.data[i];
+                if (i % 100 == 0) {
+                    window.scrollTo(0, pre.scrollHeight);
+                    await sleep();
+                }
+            }
+        };
+    </script>
+</body>
+
+</html>

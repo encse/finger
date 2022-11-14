@@ -1,7 +1,10 @@
 "use strict";
+import express from 'express';
 import net from 'net'
+import fs from 'fs'
 import {server as WebSocketServer} from 'websocket';
 import http from 'http';
+import {URL} from 'node:url';
 import Twitter from 'twitter';
 import config from './config.json';
 import os from 'os';
@@ -52,7 +55,7 @@ async function getMessage() {
         |              :@@BBBBBB@@       9@BBBBBBBBBBBB@@       G@BBBBBBB@@              
         |              r@BBGBGBGB@@@@@@@@@BGBGBGBGGGBGBB@@@@@@@@@BBGGGBGBB@              \n`.replace(/.*\| /g, "");
     msg += "\n";
-    msg += center("This is csokavar.hu Encsé's home on the web. Happy surfing.", 80) + "\n";
+    msg += center("This is csokavar.hu Encse's home on the web. Happy surfing.", 80) + "\n";
     msg += center("Server uptime: " + uptime(), 80) + "\n";
     msg += center("contact: encse@csokavar.hu", 80)+ "\n";
     msg += "\n";
@@ -102,7 +105,9 @@ async function recent_tweets() {
                 const createThread = (tweet: any, tab = '') => {
                     let res = '';
                     res += `${tab}\n`;
-                    res += `${tab}[${new Date(tweet.created_at).toUTCString()}]\n`;
+                    if (tab == '') {
+                        res += `${tab}[${new Date(tweet.created_at).toUTCString()}]\n`;
+                    }
                     res += `${tab}${tweet.full_text.split("\n").join("\n|\t")}\n`;
 
                     for (let tweetNext of data as any) {
@@ -216,14 +221,9 @@ if (config.finger_port) {
 }
 
 if (config.websocket_port) {
-    const httpServer = http.createServer().on('error', (err) => {
-        console.error('http server error', err);
-    });
-
-    httpServer.listen(config.websocket_port, () => { 
-        console.log('opened http server on', httpServer.address());
-    });
-
+    const app = express(); 
+    app.use(express.static('public'))
+    const httpServer = http.createServer(app);
     const wsServer = new WebSocketServer({ httpServer: httpServer });
 
     wsServer.on('request', async (request) => {
@@ -233,5 +233,9 @@ if (config.websocket_port) {
         connection.on('error', (err) => {
             console.error("websocket connection error", err);
         })
+    });
+
+    httpServer.listen(config.websocket_port, () => {
+        console.log(`Server started on port ${config.websocket_port} :)`);
     });
 }
