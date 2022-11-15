@@ -1,20 +1,19 @@
 "use strict";
 import express from 'express';
 import net from 'net'
-import fs from 'fs'
-import {server as WebSocketServer} from 'websocket';
+import { server as WebSocketServer } from 'websocket';
 import http from 'http';
-import {URL} from 'node:url';
 import Twitter from 'twitter';
 import config from './config.json';
 import os from 'os';
+import fetch from 'node-fetch';
 
 async function getMessage() {
 
     os.uptime()
 
     let msg =
-       `|                                       99X                                      
+        `|                                       99X                                      
         |                                 riG   @@@   Gi;                                
         |                                 B@@G  @@@  @@@9                                
         |                                  @@@; @@@ i@@G                                 
@@ -57,21 +56,30 @@ async function getMessage() {
     msg += "\n";
     msg += center("This is csokavar.hu Encse's home on the web. Happy surfing.", 80) + "\n";
     msg += center("Server uptime: " + uptime(), 80) + "\n";
-    msg += center("contact: encse@csokavar.hu", 80)+ "\n";
+    msg += center("contact: encse@csokavar.hu", 80) + "\n";
     msg += "\n";
+
+    try {
+        const skyline = await github_skyline(config.twitter_user, new Date().getFullYear());
+        msg += skyline;
+        msg += '\n';
+    } catch (err) {
+        console.error("Couldn't retrieve skyline.", err);
+    }
 
     try {
         const tweets = await recent_tweets();
         msg += 'Latest tweets\n';
         msg += '-------------\n';
         msg += tweets;
+      
     } catch (err) {
         console.error("Couldn't retrieve tweets.", err);
     }
 
     return lineBreak(msg, 80, '| ');
 }
-type TweetCache = {time:number, text: string}
+type TweetCache = { time: number, text: string }
 let tweetCache: TweetCache | null = null;
 
 async function recent_tweets() {
@@ -133,12 +141,58 @@ async function recent_tweets() {
                 resolve(tweetCache.text);
             } else {
                 console.log(err);
-                reject({params: params, err: err});
+                reject({ params: params, err: err });
             }
         });
     });
 }
 
+type GithubActivity = {
+    username: string,
+    year: string,
+    min: number
+    max: number,
+    median: number,
+    p80: number,
+    p90: number
+    p99: number,
+    contributions: GithubContributions[];
+}
+type GithubContributions = {
+    week: number,
+    days: { count: number }[]
+}
+
+async function github_skyline(user: string, year: number): Promise<string> {
+    const rsp = await fetch(`https://skyline.github.com/${user}/${year}.json`);
+    const json: GithubActivity = await rsp.json();
+    const d = json.max / 8;
+    let msg = '';
+    msg += center('\n', 80);
+    msg += `Github SkyLine for ${year}\n`;
+    msg += `--------------------------\n`;
+    msg += center('\n', 80);
+
+    for (let j = 8; j >= 0; j--) {
+        let row = "";
+        for (let contibution of json.contributions) {
+            const maxPerWeek = Math.max(...contibution.days.map(d => d.count));
+            if (maxPerWeek >= d * j){
+                row += '█';
+            } else {
+                const r = Math.random();
+                row += 
+                    Math.random() < 0.025 ? '✦' :
+                    Math.random() < 0.025 ? '✧' :
+                    Math.random() < 0.005 ? '☾' :
+                    ' ';
+            }
+        }
+        row += '\n';
+        msg += center(row, 80);
+    }
+    return msg;
+}
 
 function lineBreak(text: string, width: number, cont: string = '') {
     let lines = text.split("\n")
@@ -148,7 +202,7 @@ function lineBreak(text: string, width: number, cont: string = '') {
         let ichSpace = 0;
         let escape = false;
         let nonEscapedChars = 0;
-        
+
         for (let ich = 0; ich < line.length; ich++) {
             if (escape) {
                 if (line[ich] == ';') {
@@ -173,32 +227,33 @@ function lineBreak(text: string, width: number, cont: string = '') {
     return lines.join('\n');
 }
 
-function center(st: string, width: number){
+function center(st: string, width: number) {
     return st.padStart((width + st.length) / 2, ' ');
 }
 
-function uptime(){
+function uptime() {
     var ut_sec = os.uptime();
-    var ut_min = ut_sec/60;
-    var ut_hour = ut_min/60;
-    
+    var ut_min = ut_sec / 60;
+    var ut_hour = ut_min / 60;
+
     ut_sec = Math.floor(ut_sec);
     ut_min = Math.floor(ut_min);
     ut_hour = Math.floor(ut_hour);
-    
-    ut_hour = ut_hour%60;
-    ut_min = ut_min%60;
-    ut_sec = ut_sec%60;
-    
-    return (ut_hour + " Hour(s) " 
-            + ut_min + " minute(s) and " 
-            + ut_sec + " second(s)");
+
+    ut_hour = ut_hour % 60;
+    ut_min = ut_min % 60;
+    ut_sec = ut_sec % 60;
+
+    return (ut_hour + " Hour(s) "
+        + ut_min + " minute(s) and "
+        + ut_sec + " second(s)");
 }
 
 
-function asciiFold(st: string){
+function asciiFold(st: string) {
     // remove accents such as á -> a, é -> e, because raw TCP doesn't like it...
-    st =  st.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+    st = st.replace(/█/g,'#');
+    st = st.normalize("NFD").replace(/\p{Diacritic}/gu, "");
     // remove non ascii characters
     return st.split('').map(
         character => character.charCodeAt(0) < 127 ? character : ' '
@@ -221,7 +276,7 @@ if (config.finger_port) {
 }
 
 if (config.websocket_port) {
-    const app = express(); 
+    const app = express();
     app.use(express.static('public'))
     const httpServer = http.createServer(app);
     const wsServer = new WebSocketServer({ httpServer: httpServer });
@@ -239,3 +294,5 @@ if (config.websocket_port) {
         console.log(`Server started on port ${config.websocket_port} :)`);
     });
 }
+
+
