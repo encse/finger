@@ -13,46 +13,46 @@ async function getMessage() {
     os.uptime()
 
     let msg =
-        `|                                       99X                                      
-        |                                 riG   @@@   Gi;                                
-        |                                 B@@G  @@@  @@@9                                
-        |                                  @@@; @@@ i@@G                                 
-        |                                   @@@:B@G,@@@                                  
-        |                                   :@@@BBB@@@                                   
-        |                                    ,@BBBB@@                                    
-        |                     5M525252525253ir@BBBBBBri3225252525259i                    
-        |                     @@@@@@@@@@@@@@@@BBBBBBB@@@@@@@@@@@@@@@@                    
-        |                    :@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@@                    
-        |                    r@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@:                   
-        |                    9@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@r                   
-        |                    @@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@G                   
-        |                    @@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@@                   
-        |                   :@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@@                   
-        |                   i@BBBBBBB@@@@@BBBBBBBBBBBBBB@@@@@BBBBBBBB@,                  
-        |                   9@BBBBBB@BrrrG@@BBBBBBBBBBB@BirrM@@BBBBBB@i                  
-        |                   @@BBBBB@r     ;@BBBBBBBBBB@5      @BBBBBB@G                  
-        |                   @@BBBBB@;     :@BBBBBBBBBB@3      @@BBBBB@@                  
-        |                  :@BBBBBBB@X;:;2@BBBB@@@@BBBB@Gr:,i@@BBBBBB@@                  
-        | :                i@BBBBBBBB@@@@@@B@@@@M3@@@@B@@@@@@@BBBBBBBB@;                 
-        | 3@@@@@@@@@@@@@@@@@BBBBBBBBBBBBBB@@@Br    ,G@@@@BBBBBBBBBBBBB@@@@@@@@@@@@@@@@@@r
-        |  :@@@@@@@@@@@@@@@@BBBBBBBBBBBBB@Gr          ;XBBBBBBBBBBBBBBB@@@@@@@G@@@@@@@B: 
-        |    r@@@BBB; :,;:3@BBBBBBBBBBBBB@r   5B@GBBi   BBBBBBBBBBBBBBB@:     r@BB@@@r   
-        |      B@@B@B     i@BBBBBBBBBBBBBB@@G, :9@M;,3@@BBBBBBBBBBBBBBB@r    B@@B@@9     
-        |       r@@@@@G   B@BBBBBBBBBBBBBBB@@@@r  ;9@@@BBBBBBBBBBBBBBBB@9  5@@@@@@,      
-        |         9@@@@@; @@BBBBBBBBBBBBBBBBBB@@@@@@BBBBBBBBBBBBBBBBBBB@B:@@@@@@2        
-        |          ,@@@@@B@BBBBBBBBBBBBBBBBBBBBB@BBBBBBBBBBBBBBBBBBBBBBB@@@B@@@          
-        |            5@@@@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@@@i           
-        |             :@@@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@@B             
-        |               r@BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB@@r              
-        |                G@BBBBBBBBB@@@@BBBBBBBBBBBBBBBBBB@@@@@BBBBBBBBB@i               
-        |                @@BBB@@@@@@GBGB@@@@@BBBBBBBB@@@@@BBBBB@@@@@BBBB@B               
-        |               :@@BBBGr:;@B   ;@9 ;i@BBBBBB@9r r@G   i@5 ;3@BBB@@               
-        |               r@BBB@B   9@   3@   r@BBBBBB@G   @@   9@   i@BBBB@               
-        |               M@BBBB@G   B   5r  ,@BBBBBBBB@9   B   G:  r@@BBBB@r              
-        |               B@BBBBB@i          @@BBBBBBBB@@r         :@@BBBBB@X              
-        |               @@BBBBB@@,        @@BBBBBBBBBB@@:        @@BBBBBB@@              
-        |              :@@BBBBBB@@       9@BBBBBBBBBBBB@@       G@BBBBBBB@@              
-        |              r@BBGBGBGB@@@@@@@@@BGBGBGBGGGBGBB@@@@@@@@@BBGGGBGBB@              \n`.replace(/.*\| /g, "");
+            `|                                                                                
+            |                                       ███                                      
+            |                                 ███   ███   ███                                
+            |                                  ███  ███  ███                                 
+            |                                   ███ ███ ███                                  
+            |                                    █████████                                   
+            |                                     ███████                                    
+            |                     ███████████████████████████████████████                    
+            |                     ███████████████████████████████████████                    
+            |                     ███████████████████████████████████████                    
+            |                     ███████████████████████████████████████                    
+            |                    ▐███████████████████████████████████████▌                   
+            |                    ▐███████████████████████████████████████▌                   
+            |                    █████████████████████████████████████████                   
+            |                    █████████████████████████████████████████                   
+            |                    █████████████████████████████████████████                   
+            |                   ▐█████████▀▀▀▀███████████████▀▀▀▀█████████▌                  
+            |                   ▐███████▌      ▐███████████▌      ▐███████▌                  
+            |                   ████████▌      ▐███████████▌      ▐████████                  
+            |                   ██████████▄▄▄▄███████████████▄▄▄▄██████████                  
+            |                   █████████████████████▀█████████████████████                  
+            | ████████████████████████████████████▌     ▐███████████████████████████████████ 
+            |  ████████████████████████████████▌     █     ▐███████████████████████████████  
+            |    ███████       ███████████████▌   ███████   ▐███████████████       ██████    
+            |      ██████      █████████████████▌   ███   ▐█████████████████     ██████      
+            |        █████    █████████████████████     █████████████████████   ██████       
+            |          █████  ███████████████████████████████████████████████  █████         
+            |           ███████████████████████████████████████████████████████████          
+            |             ███████████████████████████████████████████████████████            
+            |              █████████████████████████████████████████████████████             
+            |                ▐███████████████████████████████████████████████▌               
+            |                ▐███████████████████████████████████████████████▌               
+            |                ▐███████████████████████████████████████████████▌               
+            |                ███████████   ████████████████████   ████████████               
+            |                █████   ███   ███   ████████   ███   ███   ██████               
+            |               ▐██████   ██   ██   ██████████   ██   ██   ███████▌              
+            |               ▐███████   █   █   ████████████   █   █   ████████▌              
+            |               █████████         ██████████████         ██████████              
+            |               ██████████       ████████████████       ███████████              
+            |               ███████████████████████████████████████████████████              \n`.replace(/.*\| /g, "");
     msg += "\n";
     msg += center("This is csokavar.hu Encse's home on the web. Happy surfing.", 80) + "\n";
     msg += center("Server uptime: " + uptime(), 80) + "\n";
@@ -253,6 +253,10 @@ function uptime() {
 function asciiFold(st: string) {
     // remove accents such as á -> a, é -> e, because raw TCP doesn't like it...
     st = st.replace(/█/g,'#');
+    st = st.replace(/▀/g,'"');
+    st = st.replace(/▌/g,';');
+    st = st.replace(/▐/g,':');
+    st = st.replace(/▄/g,'.');
     st = st.normalize("NFD").replace(/\p{Diacritic}/gu, "");
     // remove non ascii characters
     return st.split('').map(
