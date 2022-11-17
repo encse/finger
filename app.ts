@@ -70,7 +70,7 @@ async function getMessage() {
     try {
         const tweets = await recent_tweets();
         msg += 'Latest tweets\n';
-        msg += '-------------\n';
+        msg += '\n';
         msg += tweets;
       
     } catch (err) {
@@ -82,6 +82,16 @@ async function getMessage() {
 type TweetCache = { time: number, text: string }
 let tweetCache: TweetCache | null = null;
 
+function box(txt: string, label: string) {
+    let res = '';
+    res += '+' + '-'.repeat(78) + '+' + '\n';
+    for (let line of lineBreak(txt, 76).split('\n')) {
+        res += '| ' + line.padEnd(76, ' ') + ' |\n';
+    }
+    label = '--[' + label + ']--';
+    res += '+' + label.padStart(78, '-') + '+' + '\n';
+    return res;
+}
 async function recent_tweets() {
 
     if (tweetCache != null && tweetCache.time + (10 * 60 * 1000) >= Date.now()) {
@@ -113,23 +123,26 @@ async function recent_tweets() {
                 const createThread = (tweet: any, tab = '') => {
                     let res = '';
                     res += `${tab}\n`;
-                    if (tab == '') {
-                        res += `${tab}[${new Date(tweet.created_at).toUTCString()}]\n`;
-                    }
-                    res += `${tab}${tweet.full_text.split("\n").join("\n|\t")}\n`;
+
+                    let st = tweet.full_text
+                    st = st.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+
+                    res += lineBreak(tab + st, 76, tab)+ `\n`;
 
                     for (let tweetNext of data as any) {
                         if (tweetNext.in_reply_to_status_id_str == tweet.id_str) {
-                            res += createThread(tweetNext, '| ');
+                            res += createThread(tweetNext, '');
                         }
                     }
+
                     return res;
                 }
 
                 let res = '';
                 for (let tweet of data as any) {
                     if (tweet.in_reply_to_status_id_str == null) {
-                        res += createThread(tweet);
+                        res += box(createThread(tweet), new Date(tweet.created_at).toUTCString());
+                        res += "\n";
                     }
                 }
 
@@ -170,7 +183,7 @@ async function github_skyline(user: string, year: number): Promise<string> {
     let msg = '';
     msg += center('\n', 80);
     msg += `Github SkyLine for ${year}\n`;
-    msg += `--------------------------\n`;
+    msg += `\n`;
     msg += center('\n', 80);
 
     for (let j = 8; j >= 0; j--) {
@@ -251,13 +264,14 @@ function uptime() {
 
 
 function asciiFold(st: string) {
-    // remove accents such as á -> a, é -> e, because raw TCP doesn't like it...
     st = st.replace(/█/g,'#');
     st = st.replace(/▀/g,'"');
     st = st.replace(/▌/g,';');
     st = st.replace(/▐/g,':');
     st = st.replace(/▄/g,'.');
+    // remove accents such as á -> a, é -> e, because raw TCP doesn't like it...
     st = st.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+
     // remove non ascii characters
     return st.split('').map(
         character => character.charCodeAt(0) < 127 ? character : ' '
