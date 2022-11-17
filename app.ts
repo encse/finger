@@ -7,52 +7,14 @@ import Twitter from 'twitter';
 import config from './config.json';
 import os from 'os';
 import fetch from 'node-fetch';
+import fs from 'fs';
 
 async function getMessage() {
 
     os.uptime()
 
-    let msg =
-            `|                                                                                
-            |                                       ███                                      
-            |                                 ███   ███   ███                                
-            |                                  ███  ███  ███                                 
-            |                                   ███ ███ ███                                  
-            |                                    █████████                                   
-            |                                     ███████                                    
-            |                     ███████████████████████████████████████                    
-            |                     ███████████████████████████████████████                    
-            |                     ███████████████████████████████████████                    
-            |                     ███████████████████████████████████████                    
-            |                    ▐███████████████████████████████████████▌                   
-            |                    ▐███████████████████████████████████████▌                   
-            |                    █████████████████████████████████████████                   
-            |                    █████████████████████████████████████████                   
-            |                    █████████████████████████████████████████                   
-            |                   ▐█████████▀▀▀▀███████████████▀▀▀▀█████████▌                  
-            |                   ▐███████▌      ▐███████████▌      ▐███████▌                  
-            |                   ████████▌      ▐███████████▌      ▐████████                  
-            |                   ██████████▄▄▄▄███████████████▄▄▄▄██████████                  
-            |                   █████████████████████▀█████████████████████                  
-            | ████████████████████████████████████▌     ▐███████████████████████████████████ 
-            |  ████████████████████████████████▌     █     ▐███████████████████████████████  
-            |    ███████       ███████████████▌   ███████   ▐███████████████       ██████    
-            |      ██████      █████████████████▌   ███   ▐█████████████████     ██████      
-            |        █████    █████████████████████     █████████████████████   ██████       
-            |          █████  ███████████████████████████████████████████████  █████         
-            |           ███████████████████████████████████████████████████████████          
-            |             ███████████████████████████████████████████████████████            
-            |              █████████████████████████████████████████████████████             
-            |                ▐███████████████████████████████████████████████▌               
-            |                ▐███████████████████████████████████████████████▌               
-            |                ▐███████████████████████████████████████████████▌               
-            |                ███████████   ████████████████████   ████████████               
-            |                █████   ███   ███   ████████   ███   ███   ██████               
-            |               ▐██████   ██   ██   ██████████   ██   ██   ███████▌              
-            |               ▐███████   █   █   ████████████   █   █   ████████▌              
-            |               █████████         ██████████████         ██████████              
-            |               ██████████       ████████████████       ███████████              
-            |               ███████████████████████████████████████████████████              \n`.replace(/.*\| /g, "");
+    let msg = fs.readFileSync('logo.txt', {encoding: 'utf8'});
+
     msg += "\n";
     msg += center("This is csokavar.hu Encse's home on the web. Happy surfing.", 80) + "\n";
     msg += center("Server uptime: " + uptime(), 80) + "\n";
@@ -60,8 +22,7 @@ async function getMessage() {
     msg += "\n";
 
     try {
-        const skyline = await github_skyline(config.twitter_user, new Date().getFullYear());
-        msg += skyline;
+        msg += await github_skyline(config.twitter_user, new Date().getFullYear());
         msg += '\n';
     } catch (err) {
         console.error("Couldn't retrieve skyline.", err);
@@ -77,6 +38,11 @@ async function getMessage() {
         console.error("Couldn't retrieve tweets.", err);
     }
 
+    msg += "\n";
+    msg += center(fs.readFileSync('footer.txt', {encoding: 'utf8'}), 80);
+    msg += "\n";
+    msg += "\n";
+    msg += "\n";
     return lineBreak(msg, 80, '| ');
 }
 type TweetCache = { time: number, text: string }
@@ -181,10 +147,10 @@ async function github_skyline(user: string, year: number): Promise<string> {
     const json: GithubActivity = await rsp.json();
     const d = json.max / 8;
     let msg = '';
-    msg += center('\n', 80);
+    msg += '\n';
     msg += `Github SkyLine for ${year}\n`;
-    msg += `\n`;
-    msg += center('\n', 80);
+    msg += '\n';
+    msg += '\n';
 
     for (let j = 8; j >= 0; j--) {
         let row = "";
@@ -241,7 +207,9 @@ function lineBreak(text: string, width: number, cont: string = '') {
 }
 
 function center(st: string, width: number) {
-    return st.padStart((width + st.length) / 2, ' ');
+    const lines = st.split("\n");
+    const maxWidth = Math.max(...lines.map(x=>x.length));
+    return lines.map(line => line == '' ? '' :  ' '.repeat((width - maxWidth) / 2) + line).join('\n');
 }
 
 function uptime() {
