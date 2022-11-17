@@ -42,6 +42,17 @@ async function getMessage() {
     msg += center(fs.readFileSync('footer.txt', {encoding: 'utf8'}), 80);
     msg += "\n";
     msg += "\n";
+
+    try {
+        const gpgkey = fs.readFileSync('encse.gpg', {encoding: 'utf8'});
+        msg += "Gpg key, reach me at encse@csokavar.hu\n";
+        msg += "\n";
+        msg += center(gpgkey, 80);
+    } catch (err) {
+        console.error("Couldn't retrieve gpg key.", err);
+    }
+
+    msg += "\n";
     msg += "\n";
     return lineBreak(msg, 80, '| ');
 }
