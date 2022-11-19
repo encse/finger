@@ -1,18 +1,17 @@
 
 # A tribute to the finger protocol
 I wanted to do something historical, and set up a simple `finger` service on my [server](https://csokavar.hu). 
-As finger is totally outdated today due to security and privacy concerns, I decided to implement something very 
-simple that is still the reminiscence of the internet of the 1980's.
 
-Finger used to have a feature to show the contents of the user's `.plan` and `.project` files. Today's equivalent 
-of this would be to show the recent activity on social media sites. I decided to go with twitter.
+As finger is totally outdated today due to security and privacy concerns, I decided to implement something very simple that is still the reminiscence of the internet of the 1980's.
 
-It works on the traditional finger port (79), but it's not compliant to RFC 1288, as it is just my server, with 
-a single user. It's more like an auto response when somebody connects.
+Finger used to have a feature to show the contents of the user's `.plan` and `.project` files. Today's equivalent of this would be to show the recent activity on social media sites. I decided to go with twitter.
 
-We live in the 21st century, and everything is on the the web nowadays, so I added a second access point and 
-exposed it on websocket as well. Now if you open the developer window on my website you see the same message 
-dumped into the console.
+Not only that, but I also used the totally undocumented GitHub Skyline API to show a nice chart about
+contributions during the year. 
+
+It works on the traditional finger port (79), but it's not compliant to RFC 1288, as it is just my server, with a single user. It's more like an auto response when somebody connects.
+
+We live in the 21st century, and everything is on the the web nowadays, so I added a second access point and exposed it on http and on websocket as well. Navigate to https://finger.csokavar.hu to see it in action or open the developer window on https://csokavar.hu.
 
 ```
                                       99X                                      
@@ -59,6 +58,7 @@ dumped into the console.
 
 ## Setting it up
 I tried to make it simple and wrapped it in a Dockerfile. All you have to do is to edit the `config.json`.
+
 You get the `twitter_auth` tokens by registering a developer account and creating an app 
 at https://developer.twitter.com/. 
 
@@ -78,12 +78,13 @@ You can also try it in the browser by opening the attached `index.html` file.
 If you want to access the websocket through SSL, you need to set up a proxy that terminates the 
 SSL connection and forwards the requests to the finger service in your container.
 
-Supposed that the `websocket_port` is set to the 7979 in your `config.json` adjust your nginx 
+Supposed that the `http_port` is set to the 7979 in your `config.json` adjust your nginx 
 config file like this: 
 
 ```
 server {
 	listen 443 ssl
+
   ... other settings ...
 
   location ~ ^/finger {
