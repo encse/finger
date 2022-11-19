@@ -41,11 +41,10 @@ export async function githubSkyline(): Promise<string> {
                 if (maxPerWeek >= d * j){
                     row += '█';
                 } else {
-                    const r = Math.random();
                     row += 
-                        Math.random() < 0.025 ? '✦' :
-                        Math.random() < 0.025 ? '✧' :
-                        Math.random() < 0.005 ? '☾' :
+                        Math.random() < 0.025 ? '*' :
+                        Math.random() < 0.025 ? '.' :
+                        Math.random() < 0.005 ? '(' :
                         ' ';
                 }
             }

@@ -53,7 +53,7 @@
                 // linkify
                 pre.innerHTML = pre.innerText
                     .replaceAll(/http[s]:[^\s]*/g, x => `<a href="${x}">${x}</a>`)
-                    .replaceAll(/(\s)(csokavar\.hu)(\s)/g, `$1<a href="https://$2">$2</a>$3`);
+                    .replaceAll(/([^.@])(csokavar\.hu)/g, `$1<a href="https://$2">$2</a>`);
             };
 
         }

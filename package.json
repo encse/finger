@@ -4,7 +4,7 @@
   "description": "A simple finger service that returns latest tweets for a user. Works on a TCP port (e.g. the classic port 79) and also on a websocket.",
   "main": "app.js",
   "scripts": {
-    "service": "npx ts-node src/app.ts"
+    "service": "npx nodemon --watch 'src/**/*.*' --watch 'public/**/*.*' --exec 'npx ts-node src/app.ts'"
   },
   "author": "encse",
   "license": "ISC",
