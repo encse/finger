@@ -14,10 +14,10 @@ export function banner(): string {
 
     msg += "\n";
     msg += "\n";
+    msg += center("This is csokavar.hu, Encse's home on the web. Happy surfing.", config.screen_width) + "\n";
+    msg += "\n";
     msg += center(`Server: ${os.arch()} ${os.platform()} with ${os.cpus().length} cpu(s), load average: ${loadAvg}`, config.screen_width) + "\n";
     msg += center("uptime: " + uptime(), config.screen_width) + "\n";
-    msg += "\n";
-    msg += center("This is csokavar.hu, Encse's home on the web. Happy surfing.", config.screen_width) + "\n";
     msg += "\n";
     msg += center("operator: encse@csokavar.hu", config.screen_width) + "\n";
     msg += "\n";

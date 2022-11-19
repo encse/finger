@@ -22,33 +22,41 @@
 <body>
     <pre></pre>
     <script>
-        function sleep() {
-            return new Promise(resolve => window.requestAnimationFrame(resolve));
+        function sleep(t) {
+            return new Promise(resolve => window.setTimeout(resolve, t));
         }
 
-        async function run () {
+        function* randumChunks(st) {
+            let chunkLength = 0;
+
+            for (let i = 0; i < st.length; i += chunkLength) {
+                chunkLength = Math.floor(Math.random() * 500);
+                yield st.substr(i, chunkLength);
+            }
+        }
+
+        async function run() {
             const pre = document.getElementsByTagName('pre')[0];
 
-            for (let ch of "Pshhhkkkkkkrrrr​kakingkakingkakingtsh​chchchchchchchcch​*ding*ding*ding*....\n\n\n"){
+            for (let ch of "Pshhhkkkkkkrrrr​kakingkakingkakingtsh​chchchchchchchcch​*ding*ding*ding*....\n\n\n") {
                 pre.innerText += ch;
-                await sleep();
+                await sleep(0);
             }
 
             const host = new URL("/", document.location);
             host.protocol = host.protocol.replace('http', 'ws');
             let connection = new WebSocket(`${host}`, "finger-protocol");
+
             connection.onmessage = async (e) => {
-                let chunk = '';
-                for (let i = 0; i < e.data.length; i++) {
-                    chunk += e.data[i];
-                    if (i % 100 == 0) {
-                        pre.innerText += chunk;
-                        chunk = '';
-                        window.scrollTo(0, pre.scrollHeight);
-                        await sleep();
-                    }
+                for(let chunk of randumChunks(e.data)){
+                    pre.innerText += chunk;
+                    window.scrollTo(0, pre.scrollHeight);
+                    await sleep(50);
                 }
-                pre.innerText += chunk;
+
+                connection.close();
+                pre.innerText += '\n\nConnection closed.';
+                window.scrollTo(0, pre.scrollHeight);
 
                 // linkify
                 pre.innerHTML = pre.innerText
