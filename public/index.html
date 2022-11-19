@@ -22,30 +22,42 @@
 <body>
     <pre></pre>
     <script>
-        const sleep = () => new Promise(resolve => window.requestAnimationFrame(resolve));
+        function sleep() {
+            return new Promise(resolve => window.requestAnimationFrame(resolve));
+        }
 
-        const host = new URL("/", document.location);
-        host.protocol = host.protocol.replace('http', 'ws');
-        let connection = new WebSocket(`${host}`, "finger-protocol");
-        const pre = document.getElementsByTagName('pre')[0];
-        connection.onmessage = async (e) => {
-            let chunk = '';
-            for (let i = 0; i < e.data.length; i++) {
-                chunk += e.data[i];
-                if (i % 100 == 0) {
-                    pre.innerText += chunk;
-                    chunk = '';
-                    window.scrollTo(0, pre.scrollHeight);
-                    await sleep();
-                }
+        async function run () {
+            const pre = document.getElementsByTagName('pre')[0];
+
+            for (let ch of "Pshhhkkkkkkrrrr​kakingkakingkakingtsh​chchchchchchchcch​*ding*ding*ding*....\n\n\n"){
+                pre.innerText += ch;
+                await sleep();
             }
-            pre.innerText += chunk;
-            
-            // linkify
-            pre.innerHTML = pre.innerText
-                .replaceAll(/http[s]:[^\s]*/g, x => `<a href="${x}">${x}</a>`)
-                .replaceAll(/(\s)(csokavar\.hu)(\s)/g, `$1<a href="https://$2">$2</a>$3`);
-        };
+
+            const host = new URL("/", document.location);
+            host.protocol = host.protocol.replace('http', 'ws');
+            let connection = new WebSocket(`${host}`, "finger-protocol");
+            connection.onmessage = async (e) => {
+                let chunk = '';
+                for (let i = 0; i < e.data.length; i++) {
+                    chunk += e.data[i];
+                    if (i % 100 == 0) {
+                        pre.innerText += chunk;
+                        chunk = '';
+                        window.scrollTo(0, pre.scrollHeight);
+                        await sleep();
+                    }
+                }
+                pre.innerText += chunk;
+
+                // linkify
+                pre.innerHTML = pre.innerText
+                    .replaceAll(/http[s]:[^\s]*/g, x => `<a href="${x}">${x}</a>`)
+                    .replaceAll(/(\s)(csokavar\.hu)(\s)/g, `$1<a href="https://$2">$2</a>$3`);
+            };
+
+        }
+        run();
 
     </script>
 </body>

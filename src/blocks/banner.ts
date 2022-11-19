@@ -7,17 +7,18 @@ import config from '../../config.json';
 
 export function banner(): string {
 
-    let msg ="Pshhhkkkkkkrrrr​kakingkakingkakingtsh​chchchchchchchcch​*ding*ding*ding*....\n\n\n\n";
+    let msg ="";
 
     msg += fs.readFileSync('public/logo.txt', {encoding: 'utf8'});
     const loadAvg = os.loadavg().map(x => x.toFixed(2)).join(' ')
 
     msg += "\n";
     msg += "\n";
+    msg += center(`Server: ${os.arch()} ${os.platform()}, cpus: ${os.cpus().length}, load average: ${loadAvg}`, config.screen_width) + "\n";
+    msg += center("uptime: " + uptime(), config.screen_width) + "\n";
+    msg += "\n";
     msg += center("This is csokavar.hu Encse's home on the web. Happy surfing.", config.screen_width) + "\n";
-    msg += center(`${os.arch()} ${os.platform()}, cpus: ${os.cpus().length}, load average: ${loadAvg}`, config.screen_width) + "\n";
-    msg += center("Server uptime: " + uptime(), config.screen_width) + "\n";
-    msg += center("contact: encse@csokavar.hu", config.screen_width) + "\n";
+    msg += center("admin: encse@csokavar.hu", config.screen_width) + "\n";
     msg += "\n";
 
     return msg;
