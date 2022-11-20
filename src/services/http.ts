@@ -3,16 +3,14 @@ import { getMessage } from "../blocks/message";
 import { server as WebSocketServer } from 'websocket';
 import http from 'http';
 
-function sleep(ms: number) { 
+function sleep(ms: number) {
     return new Promise((r) => setTimeout(r, ms));
 }
 
-function* randomChunks(st: string) {
-    let chunkLength = 0;
-
-    for (let i = 0; i < st.length; i += chunkLength) {
-        chunkLength = Math.floor(Math.random() * 500);
-        yield st.substring(i, i + chunkLength);
+function* chunks(st: string, size: number): Iterable<string> {
+    for (let i = 0; i < st.length;) {
+        yield st.substring(i, i + size);
+        i += size;
     }
 }
 
@@ -20,18 +18,39 @@ export function httpService(http_port: number) {
     const app = express();
     app.use(express.static('public'))
     const httpServer = http.createServer(app);
-    const wsServer = new WebSocketServer({ httpServer: httpServer });
+    const wsServer = new WebSocketServer({ httpServer: httpServer, fragmentOutgoingMessages: false });
 
     wsServer.on('request', async (request) => {
-        var connection = request.accept('finger-protocol', request.origin);
+        let selectedSpeed = '';
+        for (let modemSpeed of "2400,4800,9600,14400,19200,28800,33600,56000,unlimited".split(',')) {
+            if (request.requestedProtocols.includes(modemSpeed)) {
+                selectedSpeed = modemSpeed;
+            }
+        }
+        if (selectedSpeed == '') {
+            console.log('rejecting ', request.requestedProtocols);
+            request.reject();
+            return;
+        }
+
+        const connection = request.accept(selectedSpeed, request.origin);
         connection.on('error', (err) => {
             console.error("websocket connection error", err);
         })
-        let message = await getMessage();
-        for (let chunk of randomChunks(message)) {
-            connection.sendUTF(chunk);
-            await sleep(50);
+
+        let bps = parseFloat(selectedSpeed) / 8;
+        if (isNaN(bps)) {
+            bps = Infinity;
         }
+
+        let message = await getMessage();
+        let first = true;
+        for (let ch of chunks(message, bps/100)) {
+            if (!first) { await sleep(10);}
+            connection.sendUTF(ch);
+            first = false;
+        }
+        console.log('done');
         connection.close();
     });
 

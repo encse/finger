@@ -22,21 +22,16 @@
 <body>
     <pre></pre>
     <script>
-        function sleep(t) {
-            return new Promise(resolve => window.setTimeout(resolve, t));
-        }
-
         async function run() {
             const pre = document.getElementsByTagName('pre')[0];
 
             for (let ch of "Pshhhkkkkkkrrrr​kakingkakingkakingtsh​chchchchchchchcch​*ding*ding*ding*....\n\n\n") {
                 pre.innerText += ch;
-                await sleep(10);
             }
 
             const host = new URL("/", document.location);
             host.protocol = host.protocol.replace('http', 'ws');
-            let connection = new WebSocket(`${host}`, "finger-protocol")
+            let connection = new WebSocket(`${host}`, "56000")
 
             connection.onmessage = async (e) => {
                 pre.innerText += e.data;

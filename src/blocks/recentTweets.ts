@@ -28,7 +28,6 @@ export async function recentTweets() {
         }
         new Twitter(config.twitter_auth).get('statuses/user_timeline', params, (err, data: any) => {
             if (!err) {
-                console.log(data);
 
                 const ids = new Set<string>();
                 for (let tweet of data as any) {
