@@ -71,7 +71,9 @@ And in a separate window:
 ```
 finger @localhost
 ```
-You can also try it in the browser by opening the attached `index.html` file.
+
+You can also try it in the browser by opening `http://localhost:7979/index.html?baud=9600`, usual
+modem speeds are supported such as 2400, 4800, 9600, 14400, 19200, 28800, 33600, 56000.
 
 ### Nginx as a wss proxy
 
