@@ -26,44 +26,33 @@
             return new Promise(resolve => window.setTimeout(resolve, t));
         }
 
-        function* randumChunks(st) {
-            let chunkLength = 0;
-
-            for (let i = 0; i < st.length; i += chunkLength) {
-                chunkLength = Math.floor(Math.random() * 500);
-                yield st.substr(i, chunkLength);
-            }
-        }
-
         async function run() {
             const pre = document.getElementsByTagName('pre')[0];
 
             for (let ch of "Pshhhkkkkkkrrrr​kakingkakingkakingtsh​chchchchchchchcch​*ding*ding*ding*....\n\n\n") {
                 pre.innerText += ch;
-                await sleep(0);
+                await sleep(10);
             }
 
             const host = new URL("/", document.location);
             host.protocol = host.protocol.replace('http', 'ws');
-            let connection = new WebSocket(`${host}`, "finger-protocol");
+            let connection = new WebSocket(`${host}`, "finger-protocol")
+
+            connection.onmessage = async (e) => {
+                pre.innerText += e.data;
+                window.scrollTo(0, pre.scrollHeight);
+            };
 
             connection.onclose = async (e) => {
-                pre.innerHTML += '\n\nConnection closed.';
-                window.scrollTo(0, pre.scrollHeight);
-            }
-            connection.onmessage = async (e) => {
-                for(let chunk of randumChunks(e.data)){
-                    pre.innerText += chunk;
-                    window.scrollTo(0, pre.scrollHeight);
-                    await sleep(50);
-                }
+                pre.innerText += '\n\nConnection closed.';
 
-                // linkify
+                 // linkify
                 pre.innerHTML = pre.innerText
                     .replaceAll(/http[s]:[^\s]*/g, x => `<a href="${x}">${x}</a>`)
                     .replaceAll(/([^.@])(csokavar\.hu)/g, `$1<a href="https://$2">$2</a>`);
-            };
 
+                window.scrollTo(0, pre.scrollHeight);
+            }
         }
         run();
 
