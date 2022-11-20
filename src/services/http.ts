@@ -22,7 +22,7 @@ export function httpService(http_port: number) {
 
     wsServer.on('request', async (request) => {
         let selectedSpeed = '';
-        for (let modemSpeed of "2400,4800,9600,14400,19200,28800,33600,56000,unlimited".split(',')) {
+        for (let modemSpeed of "2400, 4800, 9600, 14400, 19200, 28800, 33600, 56000, unlimited".split(', ')) {
             if (request.requestedProtocols.includes(modemSpeed)) {
                 selectedSpeed = modemSpeed;
             }

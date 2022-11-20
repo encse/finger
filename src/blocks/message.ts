@@ -10,11 +10,14 @@ import config from "../../config.json";
 export async function getMessage() {
 
     let msg = "";
+    msg += "\n";
+    msg += "\n";
     msg += await banner();
     msg += await githubSkyline();
     msg += await recentTweets();
     msg += await gpgKey();
     msg += await footer();
-   
+    msg += "\n";
+    msg += "\n";
     return lineBreak(msg, config.screen_width, '| ');
 }

@@ -6,6 +6,8 @@
         "access_token_secret": "..."
     },
     "twitter_user": "encse",
+    "github_user": "encse",
     "finger_port": 79,
-    "websocket_port": 7979
+    "http_port": 7979,
+    "screen_width": 80
 }

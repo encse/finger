@@ -25,13 +25,24 @@
         async function run() {
             const pre = document.getElementsByTagName('pre')[0];
 
-            for (let ch of "Pshhhkkkkkkrrrr​kakingkakingkakingtsh​chchchchchchchcch​*ding*ding*ding*....\n\n\n") {
+            for (let ch of "Pshhhkkkkkkrrrr​kakingkakingkakingtsh​chchchchchchchcch​*ding*ding*ding*....\n") {
                 pre.innerText += ch;
             }
 
             const host = new URL("/", document.location);
             host.protocol = host.protocol.replace('http', 'ws');
-            let connection = new WebSocket(`${host}`, "56000")
+
+            const params = new URL(document.location).searchParams
+            const speed = params.get('baud') ?? '9600';
+            let connection = new WebSocket(`${host}`, speed)
+
+            connection.onopen = (e) => {
+                pre.innerText += `CONNECT ${speed}\n`;
+            }
+
+            connection.onerror = (e) => {
+                pre.innerText += `ERROR\n`;
+            }
 
             connection.onmessage = async (e) => {
                 pre.innerText += e.data;
@@ -39,7 +50,7 @@
             };
 
             connection.onclose = async (e) => {
-                pre.innerText += '\n\nConnection closed.';
+                pre.innerText += `NO CARRIER\n%disconnected\n`;
 
                  // linkify
                 pre.innerHTML = pre.innerText
