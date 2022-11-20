@@ -13,8 +13,8 @@ export async function getMessage() {
     msg += "\n";
     msg += "\n";
     msg += await banner();
-    msg += await githubSkyline();
     msg += await recentTweets();
+    msg += await githubSkyline();
     msg += await gpgKey();
     msg += await footer();
     msg += "\n";
