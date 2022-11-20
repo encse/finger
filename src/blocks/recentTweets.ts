@@ -67,6 +67,7 @@ export async function recentTweets() {
             text: res
         };
         console.log("Got tweets");
+        return res;
     } catch (err) {
         console.log(err);
         return "";
