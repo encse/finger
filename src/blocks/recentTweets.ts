@@ -49,7 +49,7 @@ export async function recentTweets() {
             return res;
         }
 
-        let res = 'Latest tweets\n';
+        let res = 'Latest tweets https://twitter.com/encse\n';
         res += '\n';
         for (let tweet of data as any) {
             if (tweet.in_reply_to_status_id_str == null) {

@@ -52,6 +52,7 @@ export async function githubSkyline(): Promise<string> {
             row += '\n';
             msg += center(row, config.screen_width);
         }
+        msg += center('https://github.com/encse', config.screen_width) + '\n';
         msg += '\n';
         msg += '\n';
         console.log('got skyline')

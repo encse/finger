@@ -2,6 +2,11 @@
 <html>
 
 <head>
+    <meta property="og:title" content="Dialup">
+    <meta property="og:description" content="How things worked 40 years ago">
+    <meta property="og:url" content="https://finger.csokavar.hu">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
     <style>
         * {
             font-family: monospace;
@@ -20,16 +25,20 @@
 </head>
 
 <body>
+    <a class="github-fork-ribbon" href="https://github.com/encse/finger" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+    Connection speed: <a href="#9600">9600</a>, <a href="#19200">19200</a>, <a href="#56000">56000</a>
     <pre></pre>
     <script>
+        addEventListener('hashchange', run);
+
         async function run() {
             if (location.hash == '') {
-                location.hash = '9600';
+                return;
             }
             const speed = location.hash.substring(1);
 
             const pre = document.getElementsByTagName('pre')[0];
-
+            pre.innerText = '';
             for (let ch of "Pshhhkkkkkkrrrr​kakingkakingkakingtsh​chchchchchchchcch​*ding*ding*ding*....\n") {
                 pre.innerText += ch;
             }
