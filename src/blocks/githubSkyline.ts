@@ -25,6 +25,7 @@ export async function githubSkyline(): Promise<string> {
     
     try {
 
+        console.error("Getting skyline.");
         const rsp = await fetch(`https://skyline.github.com/${user}/${year}.json`);
         const json: GithubActivity = await rsp.json();
         const d = json.max / 8;
@@ -53,6 +54,7 @@ export async function githubSkyline(): Promise<string> {
         }
         msg += '\n';
         msg += '\n';
+        console.log('got skyline')
         return msg;
     } catch (err) {
         console.error("Couldn't retrieve skyline.", err);

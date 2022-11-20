@@ -11,14 +11,14 @@ export function httpService(http_port: number) {
 
     wsServer.on('request', async (request) => {
         var connection = request.accept('finger-protocol', request.origin);
-        connection.sendUTF(await getMessage());
-        connection.close();
         connection.on('error', (err) => {
             console.error("websocket connection error", err);
         })
+        connection.sendUTF(await getMessage());
+        connection.close();
     });
 
     httpServer.listen(http_port, () => {
         console.log(`Server started on port ${http_port} :)`);
-    });
+    })
 }

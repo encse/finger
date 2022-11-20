@@ -47,16 +47,16 @@
             host.protocol = host.protocol.replace('http', 'ws');
             let connection = new WebSocket(`${host}`, "finger-protocol");
 
+            connection.onclose = async (e) => {
+                pre.innerHTML += '\n\nConnection closed.';
+                window.scrollTo(0, pre.scrollHeight);
+            }
             connection.onmessage = async (e) => {
                 for(let chunk of randumChunks(e.data)){
                     pre.innerText += chunk;
                     window.scrollTo(0, pre.scrollHeight);
                     await sleep(50);
                 }
-
-                connection.close();
-                pre.innerText += '\n\nConnection closed.';
-                window.scrollTo(0, pre.scrollHeight);
 
                 // linkify
                 pre.innerHTML = pre.innerText
