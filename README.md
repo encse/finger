@@ -11,7 +11,10 @@ contributions during the year.
 
 It works on the traditional finger port (79), but it's not compliant to RFC 1288, as it is just my server, with a single user. It's more like an auto response when somebody connects.
 
-We live in the 21st century, and everything is on the the web nowadays, so I added a second access point and exposed it on http and on websocket as well. Navigate to https://finger.csokavar.hu to see it in action or open the developer window on https://csokavar.hu.
+We live in the 21st century, and everything is on the the web nowadays, so I added a second access point and exposed it on http and on websocket as well. Creating a website allowed
+me to play with connection speeds a bit. The websocket endpoint supports multiple protocols such as 9600 or 56000, corresponding to well known modem speeds.
+
+Navigate to https://finger.csokavar.hu to see it in action or open the developer window at https://csokavar.hu.
 
 ```
                                       99X                                      
