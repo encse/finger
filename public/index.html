@@ -23,6 +23,11 @@
     <pre></pre>
     <script>
         async function run() {
+            if (location.hash == '') {
+                location.hash = '9600';
+            }
+            const speed = location.hash.substring(1);
+
             const pre = document.getElementsByTagName('pre')[0];
 
             for (let ch of "Pshhhkkkkkkrrrr​kakingkakingkakingtsh​chchchchchchchcch​*ding*ding*ding*....\n") {
@@ -33,7 +38,6 @@
             host.protocol = host.protocol.replace('http', 'ws');
 
             const params = new URL(document.location).searchParams
-            const speed = params.get('baud') ?? '9600';
             let connection = new WebSocket(`${host}`, speed)
 
             connection.onopen = (e) => {
