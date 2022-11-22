@@ -43,14 +43,19 @@ export function httpService(http_port: number) {
             bps = Infinity;
         }
 
+
         let message = await getMessage();
         let first = true;
-        for (let ch of chunks(message, bps/10)) {
-            if (!first) { await sleep(100);}
-            connection.sendUTF(ch);
-            first = false;
+        try {
+            for (let ch of chunks(message, bps / 10)) {
+                if (!first) { await sleep(100); }
+                connection.sendUTF(ch);
+                first = false;
+            }
+            console.log('done');
+        } catch (err) {
+            console.log(err);
         }
-        console.log('done');
         connection.close();
     });
 
