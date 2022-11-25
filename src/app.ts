@@ -2,12 +2,15 @@
 
 import config from '../config.json';
 
-import { fingerService } from './services/finger';
-import { httpService } from './services/http';
+import { fingerService, fingerServiceOverHttp } from './services/finger';
+import { bbsService } from './services/bbs';
 
 if (config.finger_port) {
     fingerService(config.finger_port);
 }
-if (config.http_port) {
-    httpService(config.http_port);
+if (config.finger_over_http_port) {
+    fingerServiceOverHttp(config.finger_over_http_port);
+}
+if (config.bbs_port) {
+    bbsService(config.bbs_port);
 }

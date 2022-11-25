@@ -11,15 +11,12 @@ export function banner(): string {
 
     const loadAvg = os.loadavg().map(x => x.toFixed(2)).join(' ')
 
-    msg += center("Connected to csokavar.hu, Encse's home on the web. Happy surfing.", config.screen_width) + "\n";
+    msg += center("Connected to CSOKAVAR, Encse's home on the web. Happy surfing.", config.screen_width) + "\n";
     msg += "\n";
     msg += center(`Server: ${os.arch()} ${os.platform()} with ${os.cpus().length} cpu(s), load average: ${loadAvg}`, config.screen_width) + "\n";
     msg += center("uptime: " + uptime(), config.screen_width) + "\n";
     msg += "\n";
-    msg += center("operator: encse@csokavar.hu", config.screen_width) + "\n";
-    msg += "\n";
-    msg += fs.readFileSync('public/logo.txt', {encoding: 'utf8'});
-    msg += "\n";
+    msg += center("SysOp: encse", config.screen_width) + "\n";
     msg += "\n";
 
     return msg;

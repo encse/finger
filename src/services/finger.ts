@@ -1,9 +1,11 @@
+import express from 'express';
 import net from 'net'
 import { getMessage } from '../blocks/message';
 
 export function fingerService(finger_port: number){
     const server = net.createServer(async (socket) => {
-        let message = await getMessage()
+        let message = await getMessage();
+        console.log(message)
         message = asciiFold(message);
         socket.write(message);
         socket.end();
@@ -14,6 +16,15 @@ export function fingerService(finger_port: number){
     server.listen(finger_port, () => {
         console.log('opened finger server on', server.address());
     });
+}
+
+export function fingerServiceOverHttp(httpPort: number){
+
+    const app = express();
+    app.get('/', async (req, res) => {
+        res.send(await getMessage())
+    });
+    app.listen(httpPort)
 }
 
 function asciiFold(st: string) {

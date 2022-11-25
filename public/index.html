@@ -16,20 +16,62 @@
             color: #009900;
         }
 
+        
         html {
-            color: #aeaeae;
+            color: #d3d7cf;
             background: black;
-            font-size: 18px;
+            font-size: 15px;
+        }
+
+        #app {
+            height:100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+        }
+        #terminal {
+            flex: auto;
         }
     </style>
 </head>
 
 <body>
     <a class="github-fork-ribbon" href="https://github.com/encse/finger" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
-    Connection speed: <a href="#9600">9600</a>, <a href="#19200">19200</a>, <a href="#56000">56000</a>
-    <pre></pre>
+    <div id="app">
+        <div id="header">
+            Connection speed: <a href="#9600">9600</a>, <a href="#19200">19200</a>, <a href="#56000">56000</a>
+        </div>
+        <div id="terminal"></pre>
+    </div>
+    <link rel="stylesheet" href="https://unpkg.com/xterm@5.0.0/css/xterm.css" />
+    <script src="https://unpkg.com/xterm@5.0.0/lib/xterm.js"></script>
+    <script src="https://unpkg.com/xterm-addon-fit@0.6.0/lib/xterm-addon-fit.js"></script>
+    <script src="https://unpkg.com/xterm-addon-web-links@0.7.0/lib/xterm-addon-web-links.js"></script>
     <script>
         addEventListener('hashchange', run);
+
+        class XtermIo {
+
+            constructor(element) {
+                this.term = new Terminal({
+                    allowProposedApi: true,
+                    theme: {
+                        foreground: '#00ff33',
+                    },
+                });
+                this.term.open(element);
+                const fitAddon = new FitAddon.FitAddon();
+                this.term.loadAddon(fitAddon);
+                this.term.loadAddon(new WebLinksAddon.WebLinksAddon());
+                fitAddon.fit();
+                this.windowWidth = Math.min(80, this.term.cols - 1);
+            }
+           
+            write(text) {
+                text = text.replace(/\n/g,'\r\n');
+                this.term.write(text);
+            }
+        }
 
         async function run() {
             if (location.hash == '') {
@@ -37,10 +79,11 @@
             }
             const speed = location.hash.substring(1);
 
-            const pre = document.getElementsByTagName('pre')[0];
-            pre.innerText = '';
-            for (let ch of "Pshhhkkkkkkrrrr​kakingkakingkakingtsh​chchchchchchchcch​*ding*ding*ding*....\n") {
-                pre.innerText += ch;
+            terminalDiv = document.getElementById('terminal');
+            terminalDiv.innerHTML = '';
+            var term = new XtermIo(terminalDiv);
+            for (let ch of "\x1b[37mdialing ATDT (511) 746-7888\n") {
+                term.write(ch);
             }
 
             const host = new URL("/", document.location);
@@ -49,29 +92,27 @@
             const params = new URL(document.location).searchParams
             let connection = new WebSocket(`${host}`, speed)
 
+            let closed = false;
             connection.onopen = (e) => {
-                pre.innerText += `CONNECT ${speed}\n`;
+                term.write(`CONNECT ${speed}\n`);
             }
 
             connection.onerror = (e) => {
-                pre.innerText += `ERROR\n`;
+                term.write(`ERROR\n`);
             }
 
             connection.onmessage = async (e) => {
-                pre.innerText += e.data;
-                window.scrollTo(0, pre.scrollHeight);
-            };
+                term.write(e.data);
+            }
 
             connection.onclose = async (e) => {
-                pre.innerText += `NO CARRIER\n%disconnected\n`;
-
-                 // linkify
-                pre.innerHTML = pre.innerText
-                    .replaceAll(/http[s]:[^\s]*/g, x => `<a href="${x}">${x}</a>`)
-                    .replaceAll(/([^.@])(csokavar\.hu)/g, `$1<a href="https://$2">$2</a>`);
-
-                window.scrollTo(0, pre.scrollHeight);
+                term.write(`NO CARRIER\n%disconnected\n`);
+                closed = true;
             }
+
+            term.term.onData((e) => {
+                connection.send(e);
+            });
         }
         run();
 
