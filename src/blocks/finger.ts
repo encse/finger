@@ -7,7 +7,7 @@ import { banner } from "./banner";
 import config from "../../config.json";
 
 
-export async function getMessage() {
+export async function getFingerMessage() {
 
     let msg = "";
     msg += "\n";

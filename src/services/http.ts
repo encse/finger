@@ -7,6 +7,7 @@ import { githubSkyline } from "../blocks/githubSkyline";
 import { gpgKey } from "../blocks/gpgKey";
 import { footer } from "../blocks/footer";
 import { logo } from "../blocks/logo";
+import { getFingerMessage } from "../blocks/finger";
 
 function sleep(ms: number) {
     return new Promise((r) => setTimeout(r, ms));
@@ -221,9 +222,15 @@ class IO {
     }
 }
 
-export function bbsService(http_port: number) {
+export function httpService(http_port: number) {
     const app = express();
+
+    app.get('/finger', async (req, res) => {
+        res.send(await getFingerMessage())
+    });
+
     app.use(express.static('public'))
+
     const httpServer = http.createServer(app);
     const wsServer = new WebSocketServer({ httpServer: httpServer, fragmentOutgoingMessages: false });
 
