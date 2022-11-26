@@ -10,6 +10,28 @@ import { footer } from "../blocks/footer";
 import { logo } from "../blocks/logo";
 import { getFingerMessage } from "../blocks/finger";
 import { lookupUser, users } from "../server/users";
+import { Duplex, Readable, Writable } from "stream";
+import { TextDecoder } from "util";
+import {spawn} from "node-pty";
+import path from "path";
+
+
+class Context {
+    handlers: Array<() => void> = [];
+    on(e: 'close', handler: () => void){
+        this.handlers.push(handler);
+    }
+
+    close() {
+        for (let handler of this.handlers) {
+            try {
+                handler();
+            } catch(err) {
+                console.log(err);
+            }
+        }
+    }
+}
 
 function sleep(ms: number) {
     return new Promise((r) => setTimeout(r, ms));
@@ -65,9 +87,35 @@ class Channel {
     private buffer: string[] = [];
     private received = () => { };
     private closed: boolean = false;
-
-    constructor(public name: string) { }
+    readonly stream: Duplex;
     
+    constructor(public name: string) {
+        const self = this;
+        this.stream = new Duplex({
+            read(size: number) {
+                self.read().then(data => {
+                    if (data == Ascii.Cr) {
+                        data = Ascii.Nl;
+                    }
+                    this.push(data);
+                });
+            },
+            write(chunk: string | Buffer | Uint8Array, encoding: BufferEncoding, callback) {
+                try {
+                    if (chunk instanceof Buffer) {
+                        chunk = chunk.toString('utf-8')
+                    } else if (chunk instanceof Uint8Array) {
+                        chunk = new TextDecoder('utf-8').decode(chunk);
+                    }
+                    self.write(chunk);
+                    callback();
+                } catch (err) {
+                    console.log(err);
+                }
+            }
+        })
+    }
+
     close() {
         if (this.closed) {
             return;
@@ -77,22 +125,28 @@ class Channel {
         }
     }
 
-    write(message: string) {
+    write(message: string | Buffer) {
         if (this.closed) {
             return;
         } else {
+            if (message instanceof Buffer) {
+                message = message.toString('utf8');
+            }
             this.buffer.push(...message.split(''));
             this.received();
         }
     }
 
-    read(): Promise<string> {
-        return new Promise((resolve, reject) => {
+    read(ctx?: Context): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            if (ctx) {
+                ctx.on('close', () => reject('cancelled'))
+            }
             if (this.buffer.length > 0) {
                 resolve(this.buffer.shift()!);
             } else if (this.closed) {
                 reject(this.name + ' closed');
-            }else {
+            } else {
                 this.received = async () => {
                     this.received = () => { };
                     if (this.buffer.length > 0) {
@@ -111,7 +165,7 @@ async function runWriter(bps: number, channel: Channel, send: (st: string) => vo
     let started: number = 0;
     while (true) {
         let ch = await channel.read();
-        if (sent == bps / 10 ) {
+        if (sent == bps / 10) {
             const timeSpent = (new Date().getTime() - started);
             if (timeSpent < 100) {
                 await sleep(100 - timeSpent);
@@ -124,7 +178,7 @@ async function runWriter(bps: number, channel: Channel, send: (st: string) => vo
         }
         send(ch);
         sent++;
-    }   
+    }
 }
 class IO {
 
@@ -135,17 +189,25 @@ class IO {
 
     }
 
-    write(message: string){
-        this.outputChannel.write(message)
+    getOutput(): Writable {
+        return this.outputChannel.stream;
+    }
+
+    getInput(): Readable {
+        return this.inputChannel.stream;
+    }
+
+    write(message: string | Buffer) {
+        this.outputChannel.write(message);
     }
 
     writeLn(message: string) {
         this.outputChannel.write(message + '\n');
     }
 
-    public async read(): Promise<string> {
-      
-        let res = await this.inputChannel.read();
+    public async read(ctx?: Context): Promise<string> {
+
+        let res = await this.inputChannel.read(ctx);
         if (res == Ascii.Cr) {
             res = Ascii.Nl;
         }
@@ -153,16 +215,16 @@ class IO {
         // https://en.wikipedia.org/wiki/ANSI_escape_code#Control_characters
         if (res === Ascii.Esc) {
 
-            let ch = await this.inputChannel.read();
+            let ch = await this.inputChannel.read(ctx);
             res += ch;
             while (ch === Ascii.Esc) {
-                ch = await this.inputChannel.read();
+                ch = await this.inputChannel.read(ctx);
                 res += ch;
             }
             if (ch == '[') {
                 // CSI sequence
                 while (true) {
-                    const ch = await this.inputChannel.read();
+                    const ch = await this.inputChannel.read(ctx);
                     res += ch;
                     if ('@' <= ch && ch < Ascii.Del) {
                         break;
@@ -171,26 +233,26 @@ class IO {
             } else if (ch == ']') {
                 // OSC sequence 
                 while (!res.endsWith(Ascii.Esc + '\\')) {
-                    res += await this.inputChannel.read();
+                    res += await this.inputChannel.read(ctx);
                 }
             } else if (ch == 'O') {
-                res += await this.inputChannel.read();
+                res += await this.inputChannel.read(ctx);
             }
         }
         return res;
     }
 
-    public readLn = (prompt = '', ok: ((st:string) => boolean) | null= null) => 
+    public readLn = (prompt = '', ok: ((st: string) => boolean) | null = null) =>
         this.readLineI(prompt, false, ok ?? (() => true));
 
-    public readPassword = (prompt = '') => 
-        this.readLineI(prompt, true, () => true);   
-    
-    public readOption = (prompt: string, options: string) => 
+    public readPassword = (prompt = '') =>
+        this.readLineI(prompt, true, () => true);
+
+    public readOption = (prompt: string, options: string) =>
         this.readLineI(`${prompt} [${options}]: `, false, (st) => st.length == 1 && options.includes(st[0]));
 
-    private async readLineI(prompt = '', password = false, accept: (st:string) => boolean) : Promise<string> {
-        for(;;) {
+    private async readLineI(prompt = '', password = false, accept: (st: string) => boolean): Promise<string> {
+        for (; ;) {
             await this.write(prompt);
             let buffer = '';
             while (true) {
@@ -205,7 +267,6 @@ class IO {
                 } else if (ch == Seq.Backspace) {
                     if (buffer.length > 0) {
                         buffer = buffer.substring(0, buffer.length - 1);
-                        console.log(buffer);
                         this.write('\b \b');
                     }
                 } else if (ch.length == 1 && (ch >= ' ' || ch < Seq.Backspace)) {
@@ -225,7 +286,7 @@ export function httpService(http_port: number) {
         res.send(await getFingerMessage(lookupUser(req.params.user)));
     });
 
-    app.use(express.static('public'))
+    app.use(express.static('public/www'))
 
     const httpServer = http.createServer(app);
     const wsServer = new WebSocketServer({ httpServer: httpServer, fragmentOutgoingMessages: false });
@@ -252,23 +313,23 @@ export function httpService(http_port: number) {
         const inputChannel = new Channel('stdin');
         const outputChannel = new Channel('stdout');
 
-        connection.on('close', (m) => { 
+        connection.on('close', (m) => {
             console.error("connection closed");
-            inputChannel.close(); 
+            inputChannel.close();
             outputChannel.close();
         });
 
-        connection.on('message', (m) => { 
-            if (m.type === 'utf8') { 
-                inputChannel.write(m.utf8Data); 
+        connection.on('message', (m) => {
+            if (m.type === 'utf8') {
+                inputChannel.write(m.utf8Data);
             }
         });
 
         await Promise.allSettled([
             runSession(new IO(inputChannel, outputChannel))
-                .finally(() => {console.log("session loop finished"); outputChannel.close()}),
+                .finally(() => { console.log("session loop finished"); outputChannel.close() }),
             runWriter(bps, outputChannel, connection.sendUTF.bind(connection))
-                .finally(() => {console.log("writer loop finished"); connection.close()}),
+                .finally(() => { console.log("writer loop finished"); connection.close() }),
         ])
     });
 
@@ -295,16 +356,19 @@ async function runSession(io: IO) {
             io.writeLn(`------------`);
             io.writeLn(`t) latest tweets`);
             io.writeLn(`g) GitHub skyline`);
-            io.writeLn(`p) PGP key`);
+            io.writeLn(`c) contact sysop`);
+            io.writeLn(`z) play zork`);
             io.writeLn(`x) exit`);
             io.writeLn(``);
-            const line = await io.readOption('Select a menu item', "tgpx");
+            const line = await io.readOption('Select a menu item', "tgczx");
             if (line == 't') {
                 io.writeLn(await recentTweets(users.encse))
             } else if (line == 'g') {
                 io.writeLn(await githubSkyline(users.encse))
-            } else if (line == 'p') {
+            } else if (line == 'c') {
                 io.writeLn(await gpgKey(users.encse))
+            } else if (line == 'z') {
+                await exec(io, path.resolve('public/doors/zork/zork'));
             } else if (line == 'x') {
                 break;
             }
@@ -312,5 +376,36 @@ async function runSession(io: IO) {
         io.writeLn(``);
         io.writeLn('Have a nice day!')
         io.writeLn(await footer())
+    }
+}
+
+async function exec(io: IO, cmd: string, args: string[]=[]): Promise<void> {
+    try {
+        console.log('executing ' + cmd);
+        var ptyProcess = spawn(cmd, args, {
+            name: 'xterm-color',
+            cols: 80,
+            rows: 30,
+            cwd: path.dirname(cmd)
+        });
+
+        let ctx = new Context();
+        ptyProcess.onData((data: any) => {
+            io.write(data);
+        });
+
+        ptyProcess.onExit(() => {
+            ctx.close();
+        });
+
+        while (true) {
+            let ch = await io.read(ctx);
+            ptyProcess.write(ch);
+        }
+
+    } catch (e) {
+        console.log(e);
+    } finally {
+        console.log('quit from exec ' + cmd);
     }
 }
