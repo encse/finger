@@ -1,13 +1,23 @@
-import express from 'express';
 import net from 'net'
+import * as readline from 'readline';
+
 import { getFingerMessage } from '../blocks/finger';
+import { lookupUser } from '../server/users';
 
 export function fingerService(finger_port: number){
     const server = net.createServer(async (socket) => {
-        let message = await getFingerMessage();
-        message = asciiFold(message);
-        socket.write(message);
-        socket.end();
+        const rl = readline.createInterface({ input:socket });
+        rl.on('line', async (line: string) => {
+            try {
+                let message = await getFingerMessage(lookupUser(line));
+                message = asciiFold(message);
+                socket.write(message);
+            } catch(err) {
+                console.log(err);
+            } finally {
+                socket.end();
+            }
+        })
     }).on('error', (err) => {
         console.error('finger server error', err);
     });

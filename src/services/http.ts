@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { server as WebSocketServer } from 'websocket';
 import http from 'http';
 import { banner } from "../blocks/banner";
@@ -8,16 +9,10 @@ import { gpgKey } from "../blocks/gpgKey";
 import { footer } from "../blocks/footer";
 import { logo } from "../blocks/logo";
 import { getFingerMessage } from "../blocks/finger";
+import { lookupUser, users } from "../server/users";
 
 function sleep(ms: number) {
     return new Promise((r) => setTimeout(r, ms));
-}
-
-function* chunks(st: string, size: number): Iterable<string> {
-    for (let i = 0; i < st.length;) {
-        yield st.substring(i, i + size);
-        i += size;
-    }
 }
 
 export const Ascii = {
@@ -225,8 +220,9 @@ class IO {
 export function httpService(http_port: number) {
     const app = express();
 
-    app.get('/finger', async (req, res) => {
-        res.send(await getFingerMessage())
+    app.get('/~:user', cors(), async (req, res) => {
+        res.type('text/plain');
+        res.send(await getFingerMessage(lookupUser(req.params.user)));
     });
 
     app.use(express.static('public'))
@@ -304,11 +300,11 @@ async function runSession(io: IO) {
             io.writeLn(``);
             const line = await io.readOption('Select a menu item', "tgpx");
             if (line == 't') {
-                io.writeLn(await recentTweets())
+                io.writeLn(await recentTweets(users.encse))
             } else if (line == 'g') {
-                io.writeLn(await githubSkyline())
+                io.writeLn(await githubSkyline(users.encse))
             } else if (line == 'p') {
-                io.writeLn(await gpgKey())
+                io.writeLn(await gpgKey(users.encse))
             } else if (line == 'x') {
                 break;
             }

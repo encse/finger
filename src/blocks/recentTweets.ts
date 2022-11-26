@@ -4,17 +4,17 @@ import Twitter from 'twitter';
 import { lineBreak } from '../text/lineBreak';
 import { box } from '../text/box';
 import {cached} from './cache';
+import { User } from '../server/users';
 
-export async function recentTweets() {
+export async function recentTweets(user: User) {
 
-    const user = config.twitter_user;
     try {
-        return cached(`tweets-${user}`, async () => {
+        return cached(`tweets-${user.name}`, async () => {
             const params = {
                 q: '#nodejs',
                 count: 20,
                 result_type: 'recent',
-                screen_name: user,
+                screen_name: user.twitter,
                 tweet_mode: 'extended',
                 lang: 'en'
             }
@@ -43,7 +43,7 @@ export async function recentTweets() {
                 return res;
             }
     
-            let res = `Latest tweets https://twitter.com/${user}\n`;
+            let res = `Latest tweets https://twitter.com/${user.twitter}\n`;
             res += '\n';
             for (let tweet of data as any) {
                 if (tweet.in_reply_to_status_id_str == null) {

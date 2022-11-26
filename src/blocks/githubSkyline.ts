@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import { center } from '../text/center';
 import config from '../../config.json';
 import { cached } from './cache';
+import { User } from '../server/users';
 
 type GithubActivity = {
     username: string,
@@ -19,13 +20,12 @@ type GithubContributions = {
     days: { count: number }[]
 }
 
-export async function githubSkyline(): Promise<string> {
+export async function githubSkyline(user: User): Promise<string> {
 
-    let user = config.github_user;
     let year = new Date().getFullYear()
     try {
-        return cached(`skyline-${user}-${year}`, async () => {
-            const rsp = await fetch(`https://skyline.github.com/${user}/${year}.json`);
+        return cached(`skyline-${user.name}-${year}`, async () => {
+            const rsp = await fetch(`https://skyline.github.com/${user.github}/${year}.json`);
             const json: GithubActivity = await rsp.json();
             const d = json.max / 8;
             let msg = '';
@@ -43,15 +43,15 @@ export async function githubSkyline(): Promise<string> {
                     } else {
                         row +=
                             Math.random() < 0.025 ? '*' :
-                                Math.random() < 0.025 ? '.' :
-                                    Math.random() < 0.005 ? '(' :
-                                        ' ';
+                            Math.random() < 0.025 ? '.' :
+                            Math.random() < 0.005 ? '(' :
+                            ' ';
                     }
                 }
                 row += '\n';
                 msg += center(row, config.screen_width);
             }
-            msg += center('https://github.com/encse', config.screen_width) + '\n';
+            msg += center(`https://github.com/${user.github}`, config.screen_width) + '\n';
             msg += '\n';
             msg += '\n';
             return msg;
