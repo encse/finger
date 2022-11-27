@@ -13,7 +13,6 @@ import { lookupUser, users } from "../server/users";
 import { Duplex, Readable, Writable } from "stream";
 import { TextDecoder } from "util";
 import {spawn} from "node-pty";
-import path from "path";
 
 
 class Context {
@@ -89,8 +88,9 @@ class Channel {
     private closed: boolean = false;
     readonly stream: Duplex;
     
-    constructor(public name: string) {
+    constructor(ctx: Context, public name: string) {
         const self = this;
+        ctx.on('close', () => this.close());
         this.stream = new Duplex({
             read(size: number) {
                 self.read().then(data => {
@@ -310,13 +310,14 @@ export function httpService(http_port: number) {
         }
 
         const connection = request.accept(selectedSpeed, request.origin);
-        const inputChannel = new Channel('stdin');
-        const outputChannel = new Channel('stdout');
+        const ctx = new Context();
 
-        connection.on('close', (m) => {
+        const inputChannel = new Channel(ctx, 'stdin');
+        const outputChannel = new Channel(ctx, 'stdout');
+
+        connection.on('close', () => {
             console.error("connection closed");
-            inputChannel.close();
-            outputChannel.close();
+            ctx.close();
         });
 
         connection.on('message', (m) => {
@@ -326,7 +327,7 @@ export function httpService(http_port: number) {
         });
 
         await Promise.allSettled([
-            runSession(new IO(inputChannel, outputChannel))
+            runSession(ctx, new IO(inputChannel, outputChannel))
                 .finally(() => { console.log("session loop finished"); outputChannel.close() }),
             runWriter(bps, outputChannel, connection.sendUTF.bind(connection))
                 .finally(() => { console.log("writer loop finished"); connection.close() }),
@@ -338,7 +339,7 @@ export function httpService(http_port: number) {
     })
 }
 
-async function runSession(io: IO) {
+async function runSession(ctx: Context, io: IO) {
     io.writeLn(await banner());
     io.writeLn(`Enter your username or GUEST`);
     let username = await io.readLn('Username: ', (st) => st.trim() != '');
@@ -354,11 +355,11 @@ async function runSession(io: IO) {
         while (true) {
             io.writeLn(`BBS Menu`);
             io.writeLn(`------------`);
-            io.writeLn(`t) latest tweets`);
-            io.writeLn(`g) GitHub skyline`);
-            io.writeLn(`c) contact sysop`);
-            io.writeLn(`z) play zork`);
-            io.writeLn(`x) exit`);
+            io.writeLn(`t) latest [T]weets`);
+            io.writeLn(`g) [G]itHub skyline`);
+            io.writeLn(`c) [C]ontact sysop`);
+            io.writeLn(`z) play [Z]ork`);
+            io.writeLn(`x) e[X]it`);
             io.writeLn(``);
             const line = await io.readOption('Select a menu item', "tgczx");
             if (line == 't') {
@@ -368,7 +369,7 @@ async function runSession(io: IO) {
             } else if (line == 'c') {
                 io.writeLn(await gpgKey(users.encse))
             } else if (line == 'z') {
-                await exec(io, '/usr/bin/dfrotz -r lt -R /tmp public/doors/zdungeon.z5');
+                await exec(ctx, io, '/usr/bin/dfrotz -r lt -R /tmp public/doors/idoregesz.z5');
             } else if (line == 'x') {
                 break;
             }
@@ -379,13 +380,21 @@ async function runSession(io: IO) {
     }
 }
 
-async function exec(io: IO, cmd: string): Promise<void> {
+async function exec(parentCtx: Context, io: IO, cmd: string): Promise<void> {
     try {
         console.log('executing ' + cmd);
         var ptyProcess = spawn(cmd.split(' ')[0], cmd.split(' ').slice(1), {
             name: 'xterm-color',
             cols: 80,
             rows: 30
+        });
+
+        parentCtx.on('close', () => {
+            try {
+                ptyProcess.kill("SIGKILL");
+            } catch (e) {
+                console.log(e)
+            }
         });
 
         let ctx = new Context();
