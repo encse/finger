@@ -368,7 +368,7 @@ async function runSession(io: IO) {
             } else if (line == 'c') {
                 io.writeLn(await gpgKey(users.encse))
             } else if (line == 'z') {
-                await exec(io, 'npx', ['ts-node', 'src/app.ts', 'zrunner', 'public/doors/zdungeon.z5']);
+                await exec(io, '/usr/bin/dfrotz -r lt -R /tmp public/doors/zdungeon.z5');
             } else if (line == 'x') {
                 break;
             }
@@ -379,14 +379,13 @@ async function runSession(io: IO) {
     }
 }
 
-async function exec(io: IO, cmd: string, args: string[]=[]): Promise<void> {
+async function exec(io: IO, cmd: string): Promise<void> {
     try {
         console.log('executing ' + cmd);
-        var ptyProcess = spawn(cmd, args, {
+        var ptyProcess = spawn(cmd.split(' ')[0], cmd.split(' ').slice(1), {
             name: 'xterm-color',
             cols: 80,
-            rows: 30,
-            cwd: path.dirname(cmd)
+            rows: 30
         });
 
         let ctx = new Context();
