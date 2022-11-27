@@ -45,6 +45,7 @@ function logs() {
 }
 
 function dev() {
+   stop
    npm run service
 }
 

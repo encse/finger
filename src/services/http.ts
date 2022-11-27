@@ -339,6 +339,19 @@ export function httpService(http_port: number) {
     })
 }
 
+async function menu(io: IO, prompt: string, options: string[]) {
+    let chars = '';
+    for (let option of options){
+        let o = /\[(\w)\]/.exec(option)?.[1] ?? '';
+        o = o.toLowerCase();
+        if (o != '') {
+            io.writeLn(`: ${option}`);
+            chars += o;
+        }
+    }
+    return io.readOption(prompt, chars);
+}
+
 async function runSession(ctx: Context, io: IO) {
     io.writeLn(await banner());
     io.writeLn(`Enter your username or GUEST`);
@@ -355,13 +368,14 @@ async function runSession(ctx: Context, io: IO) {
         while (true) {
             io.writeLn(`BBS Menu`);
             io.writeLn(`------------`);
-            io.writeLn(`t) latest [T]weets`);
-            io.writeLn(`g) [G]itHub skyline`);
-            io.writeLn(`c) [C]ontact sysop`);
-            io.writeLn(`z) play [Z]ork`);
-            io.writeLn(`x) e[X]it`);
-            io.writeLn(``);
-            const line = await io.readOption('Select a menu item', "tgczx");
+
+            const line = await menu(io, 'Select an item', [
+                'Latest [T]weets',
+                '[G]itHub skyline',
+                '[C]ontact sysop',
+                process.env["DFROTZ"] != null ? 'play [Z]ork' : '',
+                'e[X]it'
+            ])
             if (line == 't') {
                 io.writeLn(await recentTweets(users.encse))
             } else if (line == 'g') {
@@ -369,7 +383,7 @@ async function runSession(ctx: Context, io: IO) {
             } else if (line == 'c') {
                 io.writeLn(await gpgKey(users.encse))
             } else if (line == 'z') {
-                await exec(ctx, io, '/usr/bin/dfrotz -r lt -R /tmp public/doors/zdungeon.z5');
+                await exec(ctx, io, `${process.env["DFROTZ"]} -r lt -R /tmp public/doors/zdungeon.z5`);
             } else if (line == 'x') {
                 break;
             }

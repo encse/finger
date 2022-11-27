@@ -23,5 +23,8 @@ RUN apt-get install -y locales &&\
 ENV LANG en_US.UTF-8 
 COPY . .
 COPY --from=builder /node_modules node_modules
-COPY --from=frotzbuilder /tmp/frotz/dfrotz /usr/bin/dfrotz
+
+ENV DFROTZ /usr/bin/dfrotz 
+COPY --from=frotzbuilder /tmp/frotz/dfrotz $DFROTZ
+
 CMD [ "npm", "run", "service" ]
