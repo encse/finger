@@ -103,9 +103,9 @@ class Channel {
             write(chunk: string | Buffer | Uint8Array, encoding: BufferEncoding, callback) {
                 try {
                     if (chunk instanceof Buffer) {
-                        chunk = chunk.toString('utf-8')
+                        chunk = chunk.toString('utf8')
                     } else if (chunk instanceof Uint8Array) {
-                        chunk = new TextDecoder('utf-8').decode(chunk);
+                        chunk = new TextDecoder('utf8').decode(chunk);
                     }
                     self.write(chunk);
                     callback();
@@ -132,7 +132,7 @@ class Channel {
             if (message instanceof Buffer) {
                 message = message.toString('utf8');
             }
-            this.buffer.push(...message.split(''));
+            this.buffer.push(...Array.from(message));
             this.received();
         }
     }
