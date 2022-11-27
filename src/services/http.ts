@@ -369,7 +369,7 @@ async function runSession(ctx: Context, io: IO) {
             } else if (line == 'c') {
                 io.writeLn(await gpgKey(users.encse))
             } else if (line == 'z') {
-                await exec(ctx, io, '/usr/bin/dfrotz -r lt -R /tmp public/doors/idoregesz.z5');
+                await exec(ctx, io, '/usr/bin/dfrotz -r lt -R /tmp public/doors/zdungeon.z5');
             } else if (line == 'x') {
                 break;
             }
