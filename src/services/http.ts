@@ -368,7 +368,7 @@ async function runSession(io: IO) {
             } else if (line == 'c') {
                 io.writeLn(await gpgKey(users.encse))
             } else if (line == 'z') {
-                await exec(io, path.resolve('public/doors/zork/zork'));
+                await exec(io, 'npx', ['ts-node', 'src/app.ts', 'zrunner', 'public/doors/zdungeon.z5']);
             } else if (line == 'x') {
                 break;
             }

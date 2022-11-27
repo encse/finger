@@ -1,14 +1,14 @@
 "use strict";
 
-import config from '../config.json';
-
-import { fingerService } from './services/finger';
-import { httpService } from './services/http';
-
-if (config.finger_port) {
-    fingerService(config.finger_port);
+async function main() {
+    if (process.argv.length == 2) {
+        const server = await import('./server');
+        server.runServer();
+    } else if(process.argv.length == 4 && process.argv[2] == 'zrunner') {
+        const zrunner = await import('./zrunner/zrunner');
+        zrunner.run(process.argv[3]);
+    }
 }
 
-if (config.http_port) {
-    httpService(config.http_port);
-}
+main();
+
