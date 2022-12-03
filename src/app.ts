@@ -1,6 +1,8 @@
 "use strict";
 
 console.log = () => {};
+console.error = () => {};
+console.warn = () => {};
 
 async function main() {
     if (process.argv.length == 2) {
