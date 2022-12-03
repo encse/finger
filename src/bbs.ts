@@ -36,7 +36,7 @@ export async function runSession() {
                 'Latest [T]weets',
                 '[G]itHub skyline',
                 '[C]ontact sysop',
-                process.env["DFROTZ"] != null ? 'play [Z]ork' : '',
+                process.env["DFROTZ"] != null ? 'play [I]dőrégész' : '',
                 'e[X]it'
             ])
             if (line == 't') {
@@ -45,10 +45,10 @@ export async function runSession() {
                 io.writeLn(await githubSkyline(users.encse))
             } else if (line == 'c') {
                 io.writeLn(await gpgKey(users.encse))
-            } else if (line == 'z') {
+            } else if (line == 'i') {
                 spawnSync(
                     process.env["DFROTZ"]!, 
-                    '-r lt -R /tmp public/doors/zdungeon.z5'.split(' '), 
+                    '-r lt -R /tmp public/doors/idoregesz.z5'.split(' '), 
                     {shell: false, stdio: "inherit"}
                 );
             } else if (line == 'x') {
