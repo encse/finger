@@ -16,7 +16,7 @@ export function fingerService(finger_port: number) {
             try {
                 let message = await getFingerMessage(lookupUser(line));
                 socket.write(asciiFold(message));
-            } catch(err){
+            } catch(err) { 
                 console.log('on:line', err);
             } finally {
                 socket.end();

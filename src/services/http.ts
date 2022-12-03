@@ -2,18 +2,11 @@ import express from "express";
 import cors from "cors";
 import { server as WebSocketServer } from 'websocket';
 import http from 'http';
-import { banner } from "../blocks/banner";
-import { recentTweets } from "../blocks/recentTweets";
-import { githubSkyline } from "../blocks/githubSkyline";
-import { gpgKey } from "../blocks/gpgKey";
-import { footer } from "../blocks/footer";
-import { logo } from "../blocks/logo";
 import { getFingerMessage } from "../blocks/finger";
-import { lookupUser, users } from "../server/users";
-import { Duplex, Readable, Writable } from "stream";
+import { lookupUser } from "../server/users";
+import { Duplex } from "stream";
 import { TextDecoder } from "util";
 import {spawn} from "node-pty";
-
 
 class Context {
     handlers: Array<() => void> = [];
@@ -36,51 +29,6 @@ function sleep(ms: number) {
     return new Promise((r) => setTimeout(r, ms));
 }
 
-export const Ascii = {
-    Nul: '\x00',
-    Soh: '\x01',
-    Etx: '\x03',
-    Eot: '\x04',
-    Enq: '\x05',
-    Tab: '\x09',
-    Esc: '\x1b',
-    Del: '\x7f',
-    Dc1: '\x11',
-    Dc2: '\x12',
-    Dc3: '\x13',
-    Dc4: '\x14',
-    Spc: ' ',
-    Cr: '\r',
-    Nl: '\n',
-}
-
-export const Seq = {
-    StartOfLine: Ascii.Soh,
-    Interrupt: Ascii.Etx,
-    EndOfText: Ascii.Eot,
-    EndOfLine: Ascii.Enq,
-    Backspace: Ascii.Del,
-    NewLine: Ascii.Nl,
-    F1: Ascii.Esc + 'OP',
-    F2: Ascii.Esc + 'OQ',
-    F3: Ascii.Esc + 'OR',
-    F4: Ascii.Esc + 'OS',
-    CtrlQ: Ascii.Dc1,
-    CtrlR: Ascii.Dc2,
-    CtrlS: Ascii.Dc3,
-    CtrlT: Ascii.Dc4,
-
-    CursorUp: Ascii.Esc + '[A',
-    CursorDown: Ascii.Esc + '[B',
-    CursorRight: Ascii.Esc + '[C',
-    CursorLeft: Ascii.Esc + '[D',
-
-    Delete: Ascii.Esc + '[3~',
-    PageUp: Ascii.Esc + '[5~',
-    PageDown: Ascii.Esc + '[6~',
-}
-
-
 class Channel {
 
     private buffer: string[] = [];
@@ -94,9 +42,6 @@ class Channel {
         this.stream = new Duplex({
             read(size: number) {
                 self.read().then(data => {
-                    if (data == Ascii.Cr) {
-                        data = Ascii.Nl;
-                    }
                     this.push(data);
                 });
             },
@@ -180,103 +125,6 @@ async function runWriter(bps: number, channel: Channel, send: (st: string) => vo
         sent++;
     }
 }
-class IO {
-
-    constructor(
-        private inputChannel: Channel,
-        private outputChannel: Channel
-    ) {
-
-    }
-
-    getOutput(): Writable {
-        return this.outputChannel.stream;
-    }
-
-    getInput(): Readable {
-        return this.inputChannel.stream;
-    }
-
-    write(message: string | Buffer) {
-        this.outputChannel.write(message);
-    }
-
-    writeLn(message: string) {
-        this.outputChannel.write(message + '\n');
-    }
-
-    public async read(ctx?: Context): Promise<string> {
-
-        let res = await this.inputChannel.read(ctx);
-        if (res == Ascii.Cr) {
-            res = Ascii.Nl;
-        }
-
-        // https://en.wikipedia.org/wiki/ANSI_escape_code#Control_characters
-        if (res === Ascii.Esc) {
-
-            let ch = await this.inputChannel.read(ctx);
-            res += ch;
-            while (ch === Ascii.Esc) {
-                ch = await this.inputChannel.read(ctx);
-                res += ch;
-            }
-            if (ch == '[') {
-                // CSI sequence
-                while (true) {
-                    const ch = await this.inputChannel.read(ctx);
-                    res += ch;
-                    if ('@' <= ch && ch < Ascii.Del) {
-                        break;
-                    }
-                }
-            } else if (ch == ']') {
-                // OSC sequence 
-                while (!res.endsWith(Ascii.Esc + '\\')) {
-                    res += await this.inputChannel.read(ctx);
-                }
-            } else if (ch == 'O') {
-                res += await this.inputChannel.read(ctx);
-            }
-        }
-        return res;
-    }
-
-    public readLn = (prompt = '', ok: ((st: string) => boolean) | null = null) =>
-        this.readLineI(prompt, false, ok ?? (() => true));
-
-    public readPassword = (prompt = '') =>
-        this.readLineI(prompt, true, () => true);
-
-    public readOption = (prompt: string, options: string) =>
-        this.readLineI(`${prompt} [${options}]: `, false, (st) => st.length == 1 && options.includes(st[0]));
-
-    private async readLineI(prompt = '', password = false, accept: (st: string) => boolean): Promise<string> {
-        for (; ;) {
-            await this.write(prompt);
-            let buffer = '';
-            while (true) {
-                let ch = await this.read();
-                if (ch == '\n') {
-                    this.write(ch);
-                    if (accept(buffer)) {
-                        return buffer;
-                    } else {
-                        break;
-                    }
-                } else if (ch == Seq.Backspace) {
-                    if (buffer.length > 0) {
-                        buffer = buffer.substring(0, buffer.length - 1);
-                        this.write('\b \b');
-                    }
-                } else if (ch.length == 1 && (ch >= ' ' || ch < Seq.Backspace)) {
-                    this.write(password ? '*' : ch)
-                    buffer += ch;
-                }
-            }
-        }
-    }
-}
 
 export function httpService(http_port: number) {
     const app = express();
@@ -327,7 +175,7 @@ export function httpService(http_port: number) {
         });
 
         await Promise.allSettled([
-            runSession(ctx, new IO(inputChannel, outputChannel))
+            exec(ctx, inputChannel, outputChannel, 'npm run --silent shell')
                 .finally(() => { console.log("session loop finished"); outputChannel.close() }),
             runWriter(bps, outputChannel, connection.sendUTF.bind(connection))
                 .finally(() => { console.log("writer loop finished"); connection.close() }),
@@ -339,68 +187,13 @@ export function httpService(http_port: number) {
     })
 }
 
-async function menu(io: IO, prompt: string, options: string[]) {
-    let chars = '';
-    for (let option of options){
-        let o = /\[(\w)\]/.exec(option)?.[1] ?? '';
-        o = o.toLowerCase();
-        if (o != '') {
-            io.writeLn(`: ${option}`);
-            chars += o;
-        }
-    }
-    return io.readOption(prompt, chars);
-}
-
-async function runSession(ctx: Context, io: IO) {
-    io.writeLn(await banner());
-    io.writeLn(`Enter your username or GUEST`);
-    let username = await io.readLn('Username: ', (st) => st.trim() != '');
-    if (username.toLowerCase() != 'guest') {
-        for (let i = 0; i < 3; i++) {
-            await io.readPassword('Password: ');
-            io.writeLn(`Password incorrect`);
-        }
-    } else {
-        io.writeLn(logo());
-        io.writeLn(`Welcome ${username}`);
-        io.writeLn(``);
-        while (true) {
-            io.writeLn(`BBS Menu`);
-            io.writeLn(`------------`);
-
-            const line = await menu(io, 'Select an item', [
-                'Latest [T]weets',
-                '[G]itHub skyline',
-                '[C]ontact sysop',
-                process.env["DFROTZ"] != null ? 'Play [I]dőrégész' : '',
-                'e[X]it'
-            ])
-            if (line == 't') {
-                io.writeLn(await recentTweets(users.encse))
-            } else if (line == 'g') {
-                io.writeLn(await githubSkyline(users.encse))
-            } else if (line == 'c') {
-                io.writeLn(await gpgKey(users.encse))
-            } else if (line == 'i') {
-                await exec(ctx, io, `${process.env["DFROTZ"]} -r lt -R /tmp public/doors/idoregesz.z5`);
-            } else if (line == 'x') {
-                break;
-            }
-        }
-        io.writeLn(``);
-        io.writeLn('Have a nice day!')
-        io.writeLn(await footer())
-    }
-}
-
-async function exec(parentCtx: Context, io: IO, cmd: string): Promise<void> {
+async function exec(parentCtx: Context, input: Channel, output:Channel, cmd: string): Promise<void> {
     try {
         console.log('executing ' + cmd);
-        var ptyProcess = spawn(cmd.split(' ')[0], cmd.split(' ').slice(1), {
+        let ptyProcess = spawn(cmd.split(' ')[0], cmd.split(' ').slice(1), {
             name: 'xterm-color',
             cols: 80,
-            rows: 30
+            rows: 30,
         });
 
         parentCtx.on('close', () => {
@@ -413,7 +206,7 @@ async function exec(parentCtx: Context, io: IO, cmd: string): Promise<void> {
 
         let ctx = new Context();
         ptyProcess.onData((data: any) => {
-            io.write(data);
+            output.write(data);
         });
 
         ptyProcess.onExit(() => {
@@ -421,7 +214,7 @@ async function exec(parentCtx: Context, io: IO, cmd: string): Promise<void> {
         });
 
         while (true) {
-            let ch = await io.read(ctx);
+            let ch = await input.read(ctx);
             ptyProcess.write(ch);
         }
 
