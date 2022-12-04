@@ -46,7 +46,7 @@ function logs() {
 
 function dev() {
    stop
-   npm run service
+   npx nodemon --watch 'src/**/*.*' --watch 'public/**/*.*' --exec 'npm run service'
 }
 
 function usage() {

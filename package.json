@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "shell": "npx ts-node src/app.ts shell",
-    "service": "npx nodemon --watch 'src/**/*.*' --watch 'public/**/*.*' --exec 'npx ts-node src/app.ts'"
+    "service": "npx ts-node src/app.ts"
   },
   "author": "encse",
   "license": "ISC",
